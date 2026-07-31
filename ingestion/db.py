@@ -1,0 +1,29 @@
+"""Database engine/session setup, shared by ingestion scripts and (via import) the backend."""
+from contextlib import contextmanager
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
+
+from config import DATABASE_URL
+from models import Base
+
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
+
+
+def init_db() -> None:
+    """Create all tables that don't already exist. Safe to call repeatedly."""
+    Base.metadata.create_all(engine)
+
+
+@contextmanager
+def get_session() -> Session:
+    session = SessionLocal()
+    try:
+        yield session
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
