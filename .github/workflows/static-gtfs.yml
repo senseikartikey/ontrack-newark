@@ -1,0 +1,27 @@
+name: Refresh static GTFS
+
+# Weekly -- NJ Transit's static schedule feed changes rarely, unlike GTFS-RT.
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Monday 06:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        working-directory: ingestion
+        run: pip install -r requirements.txt
+
+      - name: Load static GTFS
+        working-directory: ingestion
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python static_gtfs_loader.py

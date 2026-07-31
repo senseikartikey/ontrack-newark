@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getLines, getLiveStatus, type Line, type LiveTrip } from "@/lib/api";
+import {
+  getLines,
+  getLiveStatus,
+  getPredictedRisk,
+  type Line,
+  type LiveTrip,
+  type PredictedRisk,
+} from "@/lib/api";
 import ThemeToggle from "@/components/ThemeToggle";
 import { colorForLine } from "@/lib/lineColors";
 
@@ -14,10 +21,17 @@ function formatDelay(seconds: number | null) {
   return { text: `+${minutes} min`, color: "var(--status-critical)" };
 }
 
+const RISK_COLOR: Record<"low" | "medium" | "high", string> = {
+  low: "var(--status-good)",
+  medium: "var(--status-warning)",
+  high: "var(--status-critical)",
+};
+
 export default function DashboardPage() {
   const [lines, setLines] = useState<Line[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [trips, setTrips] = useState<LiveTrip[] | null>(null);
+  const [prediction, setPrediction] = useState<PredictedRisk | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -48,6 +62,23 @@ export default function DashboardPage() {
     return () => {
       cancelled = true;
       clearInterval(interval);
+    };
+  }, [selected]);
+
+  useEffect(() => {
+    if (!selected) return;
+    let cancelled = false;
+
+    getPredictedRisk(selected)
+      .then((data) => {
+        if (!cancelled) setPrediction(data);
+      })
+      .catch(() => {
+        if (!cancelled) setPrediction(null);
+      });
+
+    return () => {
+      cancelled = true;
     };
   }, [selected]);
 
@@ -161,9 +192,51 @@ export default function DashboardPage() {
           )}
         </section>
 
+        <section className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
+          <div className="px-5 py-3 border-b border-[var(--border)] flex items-center justify-between">
+            <h2 className="font-display font-semibold">Predicted delay risk</h2>
+            <span className="font-mono text-xs text-[var(--text-muted)]">
+              current hour · v1 statistical baseline
+            </span>
+          </div>
+
+          {prediction === null && (
+            <p className="px-5 py-8 text-[var(--text-secondary)] font-mono text-sm">
+              loading…
+            </p>
+          )}
+
+          {prediction?.status === "insufficient_data" && (
+            <p className="px-5 py-8 text-[var(--text-secondary)] text-sm max-w-md">
+              Not enough historical data yet for this line at this hour/day. This
+              baseline needs real accumulated delay history from `/ingestion` before
+              it can predict anything — see <code className="font-mono text-xs">/ml/README.md</code>.
+            </p>
+          )}
+
+          {prediction?.status === "ok" && (
+            <div className="px-5 py-5 flex items-center gap-4">
+              <span
+                className="font-mono text-xs font-semibold px-2.5 py-1 rounded-full"
+                style={{
+                  background: `${RISK_COLOR[prediction.risk_level]}22`,
+                  color: RISK_COLOR[prediction.risk_level],
+                }}
+              >
+                {prediction.risk_level.toUpperCase()} RISK
+              </span>
+              <span className="text-[var(--text-secondary)] text-sm">
+                Historically ~{Math.round(prediction.predicted_delay_seconds / 60)} min
+                delay for this line around this time, based on {prediction.sample_size}{" "}
+                observed trips.
+              </span>
+            </div>
+          )}
+        </section>
+
         <p className="mt-6 font-mono text-xs text-[var(--text-muted)]">
-          Predicted delay risk and historical scorecards land once /ml ships (Week
-          3-4) — see the project&apos;s ENGINEERING_LOG.md.
+          Historical scorecards land once /ml&apos;s evaluation ships (Week 4) — see
+          the project&apos;s ENGINEERING_LOG.md.
         </p>
       </main>
     </div>

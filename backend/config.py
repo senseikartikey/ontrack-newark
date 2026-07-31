@@ -25,3 +25,7 @@ LINE_DISPLAY_NAMES = {
     "MNE": "Morris & Essex Line",
     "MNEG": "Gladstone Branch",
 }
+
+# Mirrors /ml/config.py's risk thresholds -- see that file for reasoning.
+RISK_LOW_MAX_SECONDS = 120
+RISK_MEDIUM_MAX_SECONDS = 300

@@ -47,8 +47,10 @@ Running history of what was built and what broke: see [`ENGINEERING_LOG.md`](ENG
 
 - `/ingestion`: see `/ingestion/README.md`.
 - `/backend`: see `/backend/README.md`.
+- `/ml`: see `/ml/README.md`.
 - `/frontend`: see `/frontend/README.md`.
+- Scheduled jobs (production): see `/infra/README.md`.
 
 ## Current status
 
-Week 2 in progress. Weather ingestion, static GTFS ingestion, and the backend `/lines`/`/lines/{line}/live` endpoints are built and verified against real external APIs. The frontend (landing page + dashboard shell) is built and verified end-to-end against the live backend. Blocked on the user completing NJ Transit developer + Supabase signups before live rail delay data (and therefore ML) can start. See `ENGINEERING_LOG.md` for details and the plan file for the full 4-6 week build sequence.
+Week 3 done. Weather + static GTFS ingestion, backend `/lines`, `/lines/{line}/live`, and `/lines/{line}/predict` are built and verified. `/ml`'s v1 statistical baseline (delay averaged by line/hour/day-of-week) is implemented and logic-verified against synthetic data, precomputed into `delay_baseline` and served honestly (`insufficient_data` vs a real prediction) since there's no real trip history yet. The frontend (landing page + dashboard) is built and verified end-to-end, including the predicted-risk panel. `/infra` now has real GitHub Actions workflows for scheduled ingestion/baseline recomputation (previously just referenced in docs, never built). Still blocked on the user completing NJ Transit developer + Supabase signups before any of this runs against real data. See `ENGINEERING_LOG.md` for full details and the plan file for the 4-6 week build sequence.

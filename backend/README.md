@@ -2,13 +2,14 @@
 
 Owned by `backend-engineer-agent`. FastAPI app serving live status, predictions, and scorecards, reading from Postgres (populated by `/ingestion`) and precomputed predictions (populated by `/ml`).
 
-## Status (Week 1)
+## Status (Week 3)
 - `GET /health` — liveness check.
 - `GET /lines` — list of in-scope Newark-area lines.
 - `GET /lines/{line}/live` — most recent trip_updates reading per trip, within a 30-minute window.
-- `/lines/{line}/predict` and `/lines/{line}/scorecard` land in Week 3-4 once `/ml` exists.
+- `GET /lines/{line}/predict` — v1 statistical baseline lookup for the current hour/day-of-week. Returns `{"status": "insufficient_data", ...}` honestly rather than a fabricated number when `/ml` hasn't computed a trustworthy bucket yet (true for every line right now, since ingestion has no real delay history).
+- `/lines/{line}/scorecard` lands in Week 4.
 
-Smoke-tested against a throwaway SQLite DB (empty-data paths only, since no real trip data exists yet) — all endpoints return correctly, including the 404 on an unknown line.
+Smoke-tested against a throwaway SQLite DB — including seeding a real `delay_baseline` row to confirm the `/predict` "has data" path, not just the empty-data path — all endpoints return correctly, including the 404 on an unknown line.
 
 ## Setup
 ```

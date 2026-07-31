@@ -16,6 +16,17 @@ export type LiveStatus = {
   trips: LiveTrip[];
 };
 
+export type PredictedRisk =
+  | { line: string; status: "insufficient_data"; message: string }
+  | {
+      line: string;
+      status: "ok";
+      predicted_delay_seconds: number;
+      risk_level: "low" | "medium" | "high";
+      sample_size: number;
+      computed_at: string;
+    };
+
 async function apiFetch<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, { cache: "no-store" });
   if (!res.ok) {
@@ -30,4 +41,8 @@ export function getLines(): Promise<{ lines: Line[] }> {
 
 export function getLiveStatus(lineCode: string): Promise<LiveStatus> {
   return apiFetch(`/lines/${encodeURIComponent(lineCode)}/live`);
+}
+
+export function getPredictedRisk(lineCode: string): Promise<PredictedRisk> {
+  return apiFetch(`/lines/${encodeURIComponent(lineCode)}/predict`);
 }

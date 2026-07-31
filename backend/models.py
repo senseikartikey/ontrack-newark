@@ -42,6 +42,20 @@ class WeatherHourly(Base):
     collected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class DelayBaseline(Base):
+    """Read-side mirror of /ml/models.py's DelayBaseline -- see that file's docstring
+    for the bucketing convention (Python's datetime.weekday(), Monday=0)."""
+
+    __tablename__ = "delay_baseline"
+
+    line: Mapped[str] = mapped_column(String, primary_key=True)
+    hour_of_day: Mapped[int] = mapped_column(Integer, primary_key=True)
+    day_of_week: Mapped[int] = mapped_column(Integer, primary_key=True)
+    avg_delay_seconds: Mapped[float] = mapped_column(Float)
+    sample_size: Mapped[int] = mapped_column(Integer)
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class ServiceAlert(Base):
     __tablename__ = "service_alerts"
 

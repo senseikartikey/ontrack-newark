@@ -1,0 +1,28 @@
+name: Recompute delay baseline
+
+# Daily -- the underlying delay distribution shifts slowly, so there's no value
+# recomputing more often than the ingestion data itself meaningfully changes.
+on:
+  schedule:
+    - cron: "0 9 * * *" # 09:00 UTC daily
+  workflow_dispatch: {}
+
+jobs:
+  recompute:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        working-directory: ml
+        run: pip install -r requirements.txt
+
+      - name: Recompute baseline
+        working-directory: ml
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python compute_baseline.py
