@@ -42,8 +42,8 @@ export default function HeroLiveStat() {
   }, []);
 
   return (
-    <div className="font-mono text-sm rounded-lg border border-[var(--border)] bg-[var(--surface)] px-5 py-4 w-full max-w-sm">
-      <div className="flex items-center justify-between text-[var(--text-muted)] text-xs mb-3">
+    <div className="font-mono text-sm rounded-2xl border border-white/10 bg-[var(--ink-raised)] px-5 py-4 w-full max-w-sm text-left">
+      <div className="flex items-center justify-between text-white/40 text-xs mb-3">
         <span>live_status.json</span>
         <span className="flex items-center gap-1.5">
           <span
@@ -57,19 +57,17 @@ export default function HeroLiveStat() {
         </span>
       </div>
 
-      {state.status === "loading" && (
-        <p className="text-[var(--text-secondary)]">reaching the API…</p>
-      )}
+      {state.status === "loading" && <p className="text-white/60">reaching the API…</p>}
 
       {state.status === "error" && (
-        <p className="text-[var(--text-secondary)]">
+        <p className="text-white/60">
           API not reachable from here yet — this panel goes live once the backend is
           deployed and ingestion is running.
         </p>
       )}
 
       {state.status === "ready" && state.activeTrips === 0 && (
-        <p className="text-[var(--text-secondary)]">
+        <p className="text-white/60">
           Connected to {state.lines.length} Newark-area lines. No active trips in the
           last 30 minutes — data collection is running, real numbers appear here once
           live trains are in the window.
@@ -77,9 +75,9 @@ export default function HeroLiveStat() {
       )}
 
       {state.status === "ready" && state.activeTrips > 0 && (
-        <div className="space-y-1 text-[var(--text-primary)]">
+        <div className="space-y-1 text-white">
           <div>
-            active_trips: <span className="text-[var(--accent)]">{state.activeTrips}</span>
+            active_trips: <span style={{ color: "var(--lavender)" }}>{state.activeTrips}</span>
           </div>
           <div>
             delayed_5min_plus:{" "}

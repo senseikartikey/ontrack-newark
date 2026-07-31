@@ -1,34 +1,39 @@
 # Landing Page Design Brief
 
-OnTrack Newark's landing page is the piece that gets shown to people first — at meetups, at conferences, on a resume/portfolio link. It needs to read as belonging next to the best real SaaS landing pages (the caliber curated on `saaslandingpage.com` — think Linear, Vercel, Raycast, Attio), not a templated AI-generated site.
+OnTrack Newark's landing page is the piece that gets shown to people first — at meetups, at conferences, on a resume/portfolio link.
 
-## Avoid (the "AI slop" tells)
-- Purple-to-blue gradient blobs behind the hero, generic 3D-robot/neural-network stock icons, or stock photography.
-- Default Inter-everywhere with no typographic personality; center-aligned everything.
-- Cookie-cutter 3-icon feature grid with rounded gradient cards and no real content behind them.
-- A generic "Trusted by" logo row with fake/placeholder logos.
-- Vague marketing copy ("Revolutionize your commute with AI") instead of specific, honest claims.
+## Current direction (as of 2026-07-31)
 
-## Do instead
-- **Hero shows the real product, not a stock illustration.** But "real" doesn't mean flat or static — the first build (all-monochrome, one blue accent, zero motion, terminal box as the only hero visual) came back as boring, not restrained, and needed a real correction (2026-07-30). Real can be vivid: an animated, color-coded diagram of the actual Newark rail network (the lines, the two hub stations, small dots moving along each line) is *more* authentic than a plain data table, not less, and it's a far better hero visual than a flat panel.
-- **Color is not the enemy of credibility.** Use the full categorical palette from the `dataviz` skill for line identity (each line keeps one fixed hue everywhere — hero map, dashboard pills, badges) — this is real information encoding, not decoration, so it earns its vividness. A slow-drifting multi-hue aurora glow behind the hero (blues/magentas/violets from the same palette, not an arbitrary purple blob) adds atmosphere without becoming generic, because it's built from the same system as everything else on the page.
-- **Motion is expected, not optional.** Scroll-reveal on every section (fade + slide up), a staggered hero entrance, hover lift/glow on cards and buttons, and a continuously-animated hero visual. Respect `prefers-reduced-motion`, but the default experience should feel alive.
-- **Confident, expressive typography**: a genuinely bold display face (Bricolage Grotesque, not a safe/subdued choice), large size contrast, and a gradient-text treatment on the hero's key phrase — pulled from the same categorical hues, so it reads as part of the same system rather than a bolted-on marketing gradient.
-- **Dark-mode-first** (Linear/Vercel/Raycast register) is still the base register, but "dark-mode-first" was never meant to mean "colorless" — it's the surface the color and motion sit on top of.
-- **Scroll-driven "how it works"** (ingest → predict → display) with per-step accent colors, not three identical gray cards.
-- **A real, legible architecture diagram** instead of a stock graphic — now with a distinct accent color per pipeline stage.
-- **Founder note styled like a devlog/terminal snippet**, not a generic "About the team" card — fits the personal international-student/AI-analyst story better than corporate boilerplate.
-- Fully responsive, light/dark theme-aware.
+Reference: [Web design for SAS Design Studio, by Władysław for Zajno](https://dribbble.com/shots/24257855-Web-design-for-SAS-Design-Studio) — an illustrated creative-agency register, not a minimal dev-tool one. Concretely:
 
-## Still avoid, even with more color/motion
-The correction above is not a license to drift back toward slop from the other direction — still no gradient blobs *unrelated* to the product's own palette, no stock icons, no decorative animation that doesn't tie to real content, no fake logos, no vague copy. The bar is "specific and authentic to this product," not "restrained." Both a boring gray page and a generic purple-blob-and-3D-icon page fail that bar the same way.
+- **Tinted-ink dark sections** (`--ink`, a near-black with a violet undertone — never pure `#000`, per the `impeccable` skill's rule) alternating with bold pastel color-block sections (`--lavender`, `--rose`).
+- **Film grain texture** (`.grain` utility in `globals.css`, an SVG fractal-noise tile) over every section — this is what keeps flat color blocks from reading as generic/flat-slop.
+- **A hand-built flat silhouette illustration** as the primary hero-adjacent visual (`components/StationIllustration.tsx`) — a train arriving at a Newark platform, radiating sunburst arcs, soft cloud shapes, sparkle accents — depicting the actual product subject, not an abstract shape. Built by hand from SVG primitives because no image-generation tool was connected when this was built; if the Higgsfield MCP (`.mcp.json`) gets connected in a future session, revisit whether a generated illustration in this same style should replace it.
+- **A floating pill nav** (`components/PillNav.tsx`), fixed top-center, rounded-full, dark, with a rose CTA pill.
+- **An oversized lowercase wordmark divider** section (`wordmark` utility class) — the "ontrack" full-bleed moment, echoing the reference's own wordmark section.
+- **Real per-line identity color** (`lib/lineColors.ts`, from the `dataviz` skill's categorical palette) still carried through the hero line-code legend, the "how it works" step accents, the pipeline diagram, and the dashboard's line pills — the one piece of the earlier direction that stays, because it's genuine data encoding, not decoration.
+- **Motion throughout**: staggered hero entrance, scroll-reveal per section, scroll-linked parallax on the illustration, hover interactions — via the `motion` (Framer Motion) library.
+- Bold display type: Bricolage Grotesque, set lowercase for the wordmark treatment.
 
-## Structure (rough section order)
-1. Hero — tagline, one-line problem statement, live mini reliability stat/chart, primary CTA to the live dashboard, secondary CTA to GitHub.
-2. The problem, stated specifically (not "commuting is hard" — the actual Newark–NYC delay pain point, in numbers once real data exists).
-3. How it works — scroll-driven ingest → predict → display sequence.
-4. Architecture diagram.
-5. Founder note (devlog/terminal styled).
-6. Footer with links.
+### Rules borrowed from `impeccable` and `taste-skill` (applied by hand, not installed)
+- Tint blacks/grays — `--ink` has a violet undertone, never `#000`/`#111` flat gray.
+- Never gray text on a colored background — founder-note text on the rose section sits inside a dark `--ink` card, not directly on rose.
+- No bounce/elastic easing — all transitions use `easeOut` or spring with high damping.
+- Push the "taste dials" high for this page: DESIGN_VARIANCE and MOTION_INTENSITY both high (asymmetric-enough layout, real scroll/parallax motion), VISUAL_DENSITY moderate (this is a landing page, not a dashboard).
+
+## Design history (why it looks like this)
+1. **v1 (2026-07-30, restrained)**: near-monochrome, one blue accent, zero animation, terminal-box-only hero visual. Came back as boring/generic — the brief had conflated "avoid AI slop" with "stay minimal."
+2. **v2 (2026-07-30, color + motion added)**: kept the dev-tool register but added a full categorical palette, an animated SVG rail-line map, aurora background glow, motion-driven scroll reveals. Better, but still read as a developer-tool page, not a designed brand page.
+3. **v3 (2026-07-31, current)**: full pivot to the illustrated creative-agency register above, after the user pointed to a specific Dribbble reference. The lesson compounding across v1→v3: "good taste" here means specific, textured, and confidently designed — not restrained, and not generic either register.
+
+## Structure (current section order)
+1. Pill nav (fixed).
+2. Hero — ink + grain, oversized lowercase headline, rose accent line, CTA, line-code legend, live status panel.
+3. Illustration block — lavender + grain, the station illustration, scroll-parallax.
+4. The problem — ink + grain, one honest specific claim.
+5. How it works — ink + grain, 3 accent-colored steps + pipeline diagram.
+6. Big wordmark divider — ink + grain, "ontrack" in lavender.
+7. Founder note — rose + grain, dark terminal-styled card.
+8. Footer — ink + grain.
 
 Owned by `frontend-engineer-agent`; kept in sync by `docs-writer-agent` if the direction evolves. Don't change the direction unilaterally — check with Kartikey first, this is the piece he cares most about getting right.

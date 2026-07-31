@@ -2,11 +2,11 @@
 
 Owned by `frontend-engineer-agent`. Next.js (App Router, TypeScript, Tailwind) app: the public landing page and the live dashboard.
 
-## Status (Week 2, revised)
-- **Landing page** (`app/page.tsx`): built per `docs/landing-page-brief.md` — dark-mode-first, an animated color-coded SVG diagram of the real Newark rail network as the hero's primary visual, a slow-drifting multi-hue aurora background, gradient hero typography, `motion`-driven scroll reveals and hover micro-interactions, and a terminal-styled founder note. Each of the 6 Newark-area lines has a fixed identity color (`lib/lineColors.ts`, from the `dataviz` skill's categorical palette) used consistently across the hero map, the "how it works" accents, the pipeline diagram, and the dashboard's line pills. The first pass (all-monochrome, no motion) read as boring rather than restrained — see `ENGINEERING_LOG.md` (2026-07-30) for the correction. Verified in-browser in both dark and light theme.
+## Status (v3 landing page design, Week 2 functionality)
+- **Landing page** (`app/page.tsx`): illustrated creative-agency register per `docs/landing-page-brief.md` (v3, 2026-07-31) — tinted-ink/lavender/rose color-block sections with film grain texture, a hand-built flat-silhouette train/station illustration with scroll parallax, a floating pill nav, an oversized wordmark divider, and `motion`-driven scroll reveals. This is the third design pass; see `ENGINEERING_LOG.md` for why v1 (monochrome) and v2 (colorful dev-tool) both got corrected. Each of the 6 Newark-area lines still has a fixed identity color (`lib/lineColors.ts`, from the `dataviz` skill's categorical palette) carried through the hero legend, the "how it works" accents, the pipeline diagram, and the dashboard's line pills — real data encoding, not decoration. The landing page no longer follows the light/dark theme toggle (it's a fixed brand palette now); the dashboard still does.
 - **Dashboard** (`app/dashboard/page.tsx`): line picker + live status table, polling `/lines` and `/lines/{line}/live` every 30s. Verified end-to-end against a running local backend.
-- Design tokens in `app/globals.css` follow the `dataviz` skill's validated palette — status colors (`--status-good`/`--status-critical`) map directly onto on-time/delay semantics.
 - `/lines/{line}/predict` and `/lines/{line}/scorecard` UI lands once `/backend` serves them (Week 3-4).
+- A Higgsfield AI MCP connection is declared in the repo-root `.mcp.json` (for future AI-generated illustration work) but isn't live — it needs the user's own approval/credentials.
 
 ## Setup
 ```

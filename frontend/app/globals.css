@@ -2,10 +2,16 @@
 
 /*
  * Design tokens follow the validated palette from the `dataviz` skill
- * (references/palette.md) — status colors map directly onto this product's own
- * on-time/delay semantics, so they aren't an arbitrary brand choice.
- * Dark is the default register (see docs/landing-page-brief.md); light is supported
- * via the `data-theme="light"` override.
+ * (references/palette.md) for anything that encodes real data (line identity,
+ * delay status) — that part stays semantic, not decorative.
+ *
+ * The landing page's brand/marketing surfaces (grain sections, color blocks,
+ * illustration) follow docs/landing-page-brief.md's 2026-07-31 direction:
+ * a Zajno/SAS-Design-Studio-style illustrated register (heavy film grain,
+ * bold lavender/dusty-rose color blocks, flat silhouette illustration,
+ * floating pill nav) rather than the earlier restrained dev-tool look.
+ * Per the `impeccable` skill's rules: blacks are tinted, never pure #000;
+ * no gray text on colored backgrounds; no bounce/elastic easing.
  */
 :root {
   color-scheme: dark;
@@ -24,6 +30,15 @@
   --status-critical: #d03b3b;
 
   --accent: #3987e5; /* categorical slot 1 (blue), dark step */
+
+  /* Brand surfaces -- tinted, not pure black/white (impeccable rule). */
+  --ink: #16141b; /* tinted near-black, violet undertone */
+  --ink-raised: #1e1b24;
+  --lavender: #b9aee0;
+  --lavender-deep: #8f80c2;
+  --rose: #e7b8c4;
+  --rose-deep: #d891a3;
+  --cream: #f3efe9;
 
   --font-display: var(--font-bricolage);
   --font-sans: var(--font-geist-sans);
@@ -87,74 +102,70 @@ body {
 }
 
 ::selection {
-  background: var(--accent);
+  background: var(--lavender-deep);
   color: white;
 }
 
-/* Gradient text treatment for hero accent phrases -- pulls from the same
-   categorical hues used for line identity, so it reads as part of the same
-   system rather than an arbitrary marketing gradient. */
-.text-gradient {
-  background: linear-gradient(90deg, #3987e5, #d55181 50%, #9085e9);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+/* --- Brand sections (landing page only) --- */
+
+.section-ink {
+  background: var(--ink);
+  color: #f4f2f8;
+  position: relative;
 }
 
-/* Slow-drifting aurora glow behind the hero. Three blurred radial blobs in
-   categorical hues, each on its own long, gently eased loop so they never
-   fall into sync. */
-@keyframes aurora-drift-1 {
-  0%, 100% { transform: translate(-10%, -10%) scale(1); }
-  50% { transform: translate(8%, 6%) scale(1.15); }
-}
-@keyframes aurora-drift-2 {
-  0%, 100% { transform: translate(10%, 5%) scale(1.05); }
-  50% { transform: translate(-6%, -8%) scale(1.2); }
-}
-@keyframes aurora-drift-3 {
-  0%, 100% { transform: translate(0%, 10%) scale(1.1); }
-  50% { transform: translate(-8%, -4%) scale(0.95); }
+.section-lavender {
+  background: var(--lavender);
+  color: var(--ink);
+  position: relative;
 }
 
-.aurora-blob {
+.section-rose {
+  background: var(--rose);
+  color: var(--ink);
+  position: relative;
+}
+
+/* Film-grain texture: an SVG fractal-noise tile, applied as a repeating
+   background at low opacity via a pseudo-element so it layers over any
+   section color without extra markup. */
+.grain::before {
+  content: "";
   position: absolute;
-  width: 40rem;
-  height: 40rem;
-  border-radius: 9999px;
-  filter: blur(90px);
-  opacity: 0.28;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 180px 180px;
 }
-:root[data-theme="light"] .aurora-blob {
-  opacity: 0.16;
-}
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .aurora-blob {
-    opacity: 0.16;
-  }
+.section-lavender.grain::before,
+.section-rose.grain::before {
+  opacity: 0.08;
+  mix-blend-mode: multiply;
 }
 
-.aurora-blob-1 {
-  top: -10rem;
-  left: -6rem;
-  background: #3987e5;
-  animation: aurora-drift-1 22s ease-in-out infinite;
+/* Floating pill navigation. */
+.pill-nav {
+  border-radius: 9999px;
+  background: var(--ink);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 30px -8px rgba(0, 0, 0, 0.5);
 }
-.aurora-blob-2 {
-  top: -14rem;
-  right: -10rem;
-  background: #d55181;
-  animation: aurora-drift-2 26s ease-in-out infinite;
-}
-.aurora-blob-3 {
-  top: 4rem;
-  left: 30%;
-  background: #9085e9;
-  animation: aurora-drift-3 30s ease-in-out infinite;
+
+/* Oversized wordmark divider. */
+.wordmark {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.85;
+  text-transform: lowercase;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aurora-blob {
-    animation: none;
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
