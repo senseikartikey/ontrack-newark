@@ -15,6 +15,14 @@ Running, dated history of what was built and what was learned. Newest entry on t
 
 ---
 
+## 2026-07-31 — NJ Transit developer registration submitted
+**Agent**: pm-agent
+**Did**: Kartikey registered at developer.njtransit.com for RailData API access. NJT says 2-3 days for approval.
+**Status note**: this unblocks `njt_client.py`/`poll_gtfs_rt.py`'s TODOs (confirming real endpoint paths/response shapes) once approved — but does **not** block everything. The weather poller and static GTFS loader need no NJT credentials at all, only a real Postgres DB (Supabase), which is still the other pending manual step (see `/ingestion/README.md`). Setting up Supabase now, independent of the NJT wait, would let real weather + static GTFS data start accumulating today rather than waiting another 2-3 days for nothing.
+**Lesson**: when a task has multiple external blockers, check whether they're actually independent before treating the whole pipeline as blocked on the slowest one.
+
+---
+
 ## 2026-07-31 — Week 3: ML baseline, /predict endpoint, dashboard wiring, real infra
 **Agent**: ml-engineer-agent, backend-engineer-agent, frontend-engineer-agent, devops-engineer-agent (all self-instructed, per the subagent-discovery limitation noted 2026-07-30)
 **Did**:
