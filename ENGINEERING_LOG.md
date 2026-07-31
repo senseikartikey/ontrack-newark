@@ -15,6 +15,16 @@ Running, dated history of what was built and what was learned. Newest entry on t
 
 ---
 
+## 2026-07-31 — Supabase connected, real ingestion runs, GitHub Actions IPv6 bug found
+**Agent**: pm-agent, devops-engineer-agent
+**Did**: Kartikey created a Supabase project. Wired `DATABASE_URL` into `/ingestion`, `/backend`, `/ml`'s local `.env` files; ran `init_db()` and both `poll_weather.py` and `static_gtfs_loader.py` for real against production Supabase (156 weather rows, 17 routes, 231 stops -- verified with a row-count query, not just "no errors"). Started backend + frontend locally against the real database and confirmed the dashboard renders real data end-to-end. Created the GitHub repo (`senseikartikey/ontrack-newark`, public), pushed, set `DATABASE_URL`/`WEATHER_USER_AGENT` as repo secrets, and manually triggered all three Actions workflows to prove they actually run in CI, not just locally.
+**Issue**: all three workflow runs failed identically: `connection to server at "db.skkefoipdlvwoenzecii.supabase.co" (2600:...), port 5432 failed: Network is unreachable`.
+**Root cause**: the connection string Kartikey provided was Supabase's *direct* database connection string, which resolves to an IPv6-only address. GitHub Actions runners don't have IPv6 connectivity. It worked locally only because this machine has IPv6 connectivity (or a dual-stack path) that GitHub's runners don't -- so the exact same code and connection string succeeded in one environment and failed in the other for a network-layer reason that had nothing to do with the code.
+**Fix**: need the Supabase **pooler** connection string instead (Project Settings → Database → Connection pooling → Transaction mode → URI, port 6543, IPv4-compatible) in place of the direct one, both in local `.env` files and the `DATABASE_URL` GitHub secret.
+**Lesson**: "it worked when I ran it locally" is not sufficient verification for infrastructure that's meant to run somewhere else (CI, a different host) -- network path differences (IPv4/IPv6 support, egress rules) are invisible until tested in the actual target environment. The instruction to use the pooler string was given up front specifically to avoid this, but the direct string still got used since it's easy to grab the wrong one from Supabase's dashboard; worth double-checking the actual string's port (5432 = direct, 6543 = pooler) before trusting it rather than assuming the user grabbed the right one.
+
+---
+
 ## 2026-07-31 — NJ Transit developer registration submitted
 **Agent**: pm-agent
 **Did**: Kartikey registered at developer.njtransit.com for RailData API access. NJT says 2-3 days for approval.
