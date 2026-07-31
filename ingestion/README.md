@@ -4,7 +4,8 @@ Owned by `data-engineer-agent`. Collects NJ Transit rail delay data and Newark-a
 
 ## Status
 - **Weather (`weather_client.py`, `poll_weather.py`)**: working, verified live against `api.weather.gov`. No API key needed.
-- **NJ Transit RailData (`njt_client.py`, `poll_gtfs_rt.py`)**: scaffolded but **blocked on real credentials**. NJT's API docs are only visible after registering. Every `TODO` in `njt_client.py` and `poll_gtfs_rt.py` needs to be checked against the real API reference once you have access, before this will actually pull data.
+- **Static GTFS (`static_gtfs_loader.py`)**: working, verified live against NJ Transit's public `rail_data.zip` (no auth required). Loads `routes`/`stops` reference tables. Also used to verify the real `NEWARK_AREA_LINES` codes and Newark station stop_ids in `config.py` — see `ENGINEERING_LOG.md` (2026-07-30).
+- **NJ Transit RailData / GTFS-RT (`njt_client.py`, `poll_gtfs_rt.py`)**: scaffolded but **blocked on real credentials**. Unlike the static feed, this one requires developer portal registration and its docs are only visible after logging in. Every `TODO` in `njt_client.py` and `poll_gtfs_rt.py` needs to be checked against the real API reference once you have access, before this will actually pull live delay data.
 
 ## Setup
 ```

@@ -29,18 +29,24 @@ NWS_HOURLY_FORECAST_URL = (
     f"https://api.weather.gov/gridpoints/{NWS_GRID_ID}/{NWS_GRID_X},{NWS_GRID_Y}/forecast/hourly"
 )
 
-# Newark-area rail lines in scope for v1. These are NJ Transit's public line names;
-# once the static GTFS feed is loaded (Week 2), cross-check these against the feed's
-# actual route_id/route_short_name values and update NEWARK_AREA_LINES accordingly --
-# matching by name substring here is a best-effort placeholder, not a confirmed mapping.
-NEWARK_AREA_LINES = [
-    "Northeast Corridor",
-    "North Jersey Coast Line",
-    "Raritan Valley Line",
-    "Morristown Line",
-    "Gladstone Branch",
-    "Montclair-Boonton Line",
-]
+# Static GTFS static rail feed -- public, no auth required (confirmed 2026-07-30).
+NJT_STATIC_GTFS_URL = "https://www.njtransit.com/rail_data.zip"
 
-# The two Newark rail stations most riders care about for this project.
-NEWARK_STATIONS = ["Newark Penn Station", "Newark Broad Street"]
+# Newark station stop_ids, confirmed against the static GTFS feed on 2026-07-30
+# (stops.txt: 106 = "NEWARK BROAD ST", 107 = "NEWARK PENN STATION").
+NEWARK_STATION_STOP_IDS = {"106": "Newark Broad Street", "107": "Newark Penn Station"}
+
+# Newark-area rail lines in scope for v1, keyed by route_short_name -- verified by
+# joining stop_times.txt -> trips.txt -> routes.txt for stop_id 106 and 107 in the
+# static GTFS feed on 2026-07-30 (see ENGINEERING_LOG.md). This replaces the earlier
+# unconfirmed route-long-name guesses.
+NEWARK_AREA_LINES = [
+    "NEC",    # Northeast Corridor -- serves Newark Penn Station
+    "NJCL",   # North Jersey Coast Line -- serves Newark Penn Station
+    "NJCLL",  # North Jersey Coast Line (local/variant) -- serves Newark Penn Station
+    "RARV",   # Raritan Valley Line -- serves Newark Penn Station
+    "BNTN",   # Montclair-Boonton Line -- serves Newark Broad Street
+    "BNTNM",  # Montclair-Boonton Line (variant) -- serves Newark Broad Street
+    "MNE",    # Morris & Essex Line -- serves Newark Broad Street
+    "MNEG",   # Gladstone Branch -- serves Newark Broad Street
+]

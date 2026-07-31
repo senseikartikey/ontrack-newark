@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from config import NEWARK_AREA_LINES
+from config import LINE_DISPLAY_NAMES, NEWARK_AREA_LINES
 from db import get_db
 from models import TripUpdate
 
@@ -19,7 +19,12 @@ LIVE_WINDOW_MINUTES = 30
 
 @router.get("")
 def list_lines():
-    return {"lines": NEWARK_AREA_LINES}
+    return {
+        "lines": [
+            {"code": code, "display_name": LINE_DISPLAY_NAMES.get(code, code)}
+            for code in NEWARK_AREA_LINES
+        ]
+    }
 
 
 @router.get("/{line}/live")

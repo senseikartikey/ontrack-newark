@@ -43,12 +43,12 @@ Running history of what was built and what broke: see [`ENGINEERING_LOG.md`](ENG
 - **No secrets committed**: NJ Transit API keys, weather API keys, and DB connection strings live in `.env` (gitignored) locally and in the hosting provider's secret manager in deployment. `.env.example` documents required vars.
 - **Every meaningful unit of work gets an `ENGINEERING_LOG.md` entry** — especially anything that broke and got fixed. This is the project's memory across sessions.
 
-## How to run locally (fill in as each layer is built)
+## How to run locally
 
-- `/ingestion`: see `/ingestion/README.md` once scaffolded (Week 1).
-- `/backend`: see `/backend/README.md` once scaffolded (Week 1).
-- `/frontend`: see `/frontend/README.md` once scaffolded (Week 2).
+- `/ingestion`: see `/ingestion/README.md`.
+- `/backend`: see `/backend/README.md`.
+- `/frontend`: see `/frontend/README.md`.
 
 ## Current status
 
-Day 0 — repo scaffolded, org/tooling files in place. See `ENGINEERING_LOG.md` for the latest entry and the plan file for the full 4-6 week build sequence.
+Week 2 in progress. Weather ingestion, static GTFS ingestion, and the backend `/lines`/`/lines/{line}/live` endpoints are built and verified against real external APIs. The frontend (landing page + dashboard shell) is built and verified end-to-end against the live backend. Blocked on the user completing NJ Transit developer + Supabase signups before live rail delay data (and therefore ML) can start. See `ENGINEERING_LOG.md` for details and the plan file for the full 4-6 week build sequence.

@@ -42,6 +42,28 @@ class WeatherHourly(Base):
     collected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class Route(Base):
+    """Static reference data from routes.txt in NJ Transit's public GTFS feed."""
+
+    __tablename__ = "routes"
+
+    route_id: Mapped[str] = mapped_column(String, primary_key=True)
+    short_name: Mapped[str] = mapped_column(String, index=True)
+    long_name: Mapped[str] = mapped_column(String)
+    color: Mapped[str] = mapped_column(String, nullable=True)
+
+
+class Stop(Base):
+    """Static reference data from stops.txt in NJ Transit's public GTFS feed."""
+
+    __tablename__ = "stops"
+
+    stop_id: Mapped[str] = mapped_column(String, primary_key=True)
+    stop_name: Mapped[str] = mapped_column(String, index=True)
+    lat: Mapped[float] = mapped_column(Float, nullable=True)
+    lon: Mapped[float] = mapped_column(Float, nullable=True)
+
+
 class ServiceAlert(Base):
     """An active NJ Transit rail service alert."""
 

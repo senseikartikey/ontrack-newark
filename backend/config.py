@@ -9,11 +9,19 @@ CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "http://localh
 
 # Mirrors /ingestion/config.py's NEWARK_AREA_LINES -- kept in sync manually, see the
 # note in backend/models.py about why these aren't shared via cross-directory import.
-NEWARK_AREA_LINES = [
-    "Northeast Corridor",
-    "North Jersey Coast Line",
-    "Raritan Valley Line",
-    "Morristown Line",
-    "Gladstone Branch",
-    "Montclair-Boonton Line",
-]
+# Verified route_short_name codes -- see ENGINEERING_LOG.md (2026-07-30).
+NEWARK_AREA_LINES = ["NEC", "NJCL", "NJCLL", "RARV", "BNTN", "BNTNM", "MNE", "MNEG"]
+
+NEWARK_STATION_STOP_IDS = {"106": "Newark Broad Street", "107": "Newark Penn Station"}
+
+# route_short_name -> route_long_name, from the static GTFS routes.txt (2026-07-30).
+LINE_DISPLAY_NAMES = {
+    "NEC": "Northeast Corridor",
+    "NJCL": "North Jersey Coast Line",
+    "NJCLL": "North Jersey Coast Line",
+    "RARV": "Raritan Valley Line",
+    "BNTN": "Montclair-Boonton Line",
+    "BNTNM": "Montclair-Boonton Line",
+    "MNE": "Morris & Essex Line",
+    "MNEG": "Gladstone Branch",
+}

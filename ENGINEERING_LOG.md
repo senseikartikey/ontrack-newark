@@ -15,6 +15,22 @@ Running, dated history of what was built and what was learned. Newest entry on t
 
 ---
 
+## 2026-07-30 — Week 2: static GTFS, corrected line codes, frontend build
+**Agent**: data-engineer-agent, backend-engineer-agent, frontend-engineer-agent
+**Did**:
+- Discovered NJ Transit's static rail GTFS feed (`https://www.njtransit.com/rail_data.zip`) is genuinely public — no auth required, unlike the GTFS-RT RailData API. Downloaded and parsed it for real.
+- Used the real `routes.txt`/`stops.txt`/`stop_times.txt`/`trips.txt` to **replace guessed line names with verified data**: joined stop_times → trips → routes for Newark Penn Station (stop_id 107) and Newark Broad Street (stop_id 106) to get the actual route_short_name codes serving each station (NEC/NJCL/NJCLL/RARV at Penn; BNTN/BNTNM/MNE/MNEG at Broad St). Updated `NEWARK_AREA_LINES` in both `/ingestion/config.py` and `/backend/config.py` accordingly.
+- Built and verified `/ingestion/static_gtfs_loader.py` (Route/Stop reference tables) against the real downloaded feed (17 routes, 231 stops parsed correctly).
+- Updated `/backend`'s `/lines` endpoint to return `{code, display_name}` using a verified route_short_name → route_long_name mapping; re-verified all endpoints still pass.
+- Scaffolded `/frontend` (Next.js, TypeScript, Tailwind via `create-next-app`). Built the landing page per `docs/landing-page-brief.md` and a dashboard shell polling the live backend. Design tokens use the `dataviz` skill's validated palette, with status colors mapped to on-time/delay semantics.
+- Verified everything for real: `npm run lint` and `npm run build` both pass clean; ran the production build and the FastAPI backend together locally, loaded both pages in-browser (dark and light theme), and confirmed the dashboard's line picker and live-status table genuinely round-trip through the real API — not just visually inspected.
+**Issue**: `create-next-app`'s new `react-hooks/set-state-in-effect` lint rule flagged the first draft of `ThemeToggle.tsx` (calling `setState` synchronously inside a `useEffect` to hydrate theme from `localStorage`).
+**Root cause**: that pattern is exactly what the rule exists to catch — `localStorage` is external state, and synchronizing external state into React via an effect-that-calls-setState causes an extra render pass; React's own guidance is to use `useSyncExternalStore` for this case instead.
+**Fix**: rewrote `ThemeToggle` around `useSyncExternalStore` (subscribing to a custom event + the native `storage` event) with a plain DOM-sync effect for the `data-theme` attribute — no setState-in-effect, lint clean.
+**Lesson**: when a static/public data source dependency turns out to be genuinely public (like the static GTFS feed vs. the gated RailData API), verify it immediately by actually downloading and parsing it rather than assuming the same access barrier applies everywhere — it upgraded several "TODO, unconfirmed" placeholders from Week 1 to verified facts and unblocked real Week 2 work without needing the still-pending NJT account.
+
+---
+
 ## 2026-07-30 — Week 1 kickoff: ingestion + backend scaffolds
 **Agent**: data-engineer-agent, backend-engineer-agent
 **Did**:
