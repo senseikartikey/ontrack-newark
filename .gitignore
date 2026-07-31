@@ -1,0 +1,30 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+.vercel/
+
+# ML artifacts
+/ml/models/*.pkl
+/ml/models/*.txt
+/ml/models/*.joblib
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
