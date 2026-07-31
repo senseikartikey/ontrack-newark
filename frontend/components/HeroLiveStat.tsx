@@ -42,32 +42,37 @@ export default function HeroLiveStat() {
   }, []);
 
   return (
-    <div className="font-mono text-sm rounded-2xl border border-white/10 bg-[var(--ink-raised)] px-5 py-4 w-full max-w-sm text-left">
-      <div className="flex items-center justify-between text-white/40 text-xs mb-3">
-        <span>live_status.json</span>
+    <div
+      className="font-mono text-xs border px-5 py-4 w-full max-w-sm text-left backdrop-blur-sm"
+      style={{ borderColor: "var(--hairline)", background: "rgba(12,10,8,0.55)" }}
+    >
+      <div
+        className="flex items-center justify-between text-[0.6875rem] tracking-[0.08em] mb-3"
+        style={{ color: "var(--paper-dim)" }}
+      >
+        <span>LIVE_STATUS.JSON</span>
         <span className="flex items-center gap-1.5">
           <span
             className="inline-block w-1.5 h-1.5 rounded-full"
             style={{
-              background:
-                state.status === "ready" ? "var(--status-good)" : "var(--status-warning)",
+              background: state.status === "ready" ? "var(--signal)" : "var(--paper-dim)",
             }}
           />
           {state.status === "ready" ? "connected" : state.status === "loading" ? "connecting" : "offline"}
         </span>
       </div>
 
-      {state.status === "loading" && <p className="text-white/60">reaching the API…</p>}
+      {state.status === "loading" && <p style={{ color: "var(--paper-dim)" }}>reaching the API…</p>}
 
       {state.status === "error" && (
-        <p className="text-white/60">
+        <p style={{ color: "var(--paper-dim)" }}>
           API not reachable from here yet — this panel goes live once the backend is
           deployed and ingestion is running.
         </p>
       )}
 
       {state.status === "ready" && state.activeTrips === 0 && (
-        <p className="text-white/60">
+        <p style={{ color: "var(--paper-dim)" }}>
           Connected to {state.lines.length} Newark-area lines. No active trips in the
           last 30 minutes — data collection is running, real numbers appear here once
           live trains are in the window.
@@ -75,9 +80,9 @@ export default function HeroLiveStat() {
       )}
 
       {state.status === "ready" && state.activeTrips > 0 && (
-        <div className="space-y-1 text-white">
+        <div className="space-y-1" style={{ color: "var(--paper)" }}>
           <div>
-            active_trips: <span style={{ color: "var(--lavender)" }}>{state.activeTrips}</span>
+            active_trips: <span style={{ color: "var(--signal)" }}>{state.activeTrips}</span>
           </div>
           <div>
             delayed_5min_plus:{" "}

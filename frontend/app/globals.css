@@ -3,15 +3,16 @@
 /*
  * Design tokens follow the validated palette from the `dataviz` skill
  * (references/palette.md) for anything that encodes real data (line identity,
- * delay status) — that part stays semantic, not decorative.
+ * delay status) -- that stays confined to /dashboard, a utility surface.
  *
- * The landing page's brand/marketing surfaces (grain sections, color blocks,
- * illustration) follow docs/landing-page-brief.md's 2026-07-31 direction:
- * a Zajno/SAS-Design-Studio-style illustrated register (heavy film grain,
- * bold lavender/dusty-rose color blocks, flat silhouette illustration,
- * floating pill nav) rather than the earlier restrained dev-tool look.
- * Per the `impeccable` skill's rules: blacks are tinted, never pure #000;
- * no gray text on colored backgrounds; no bounce/elastic easing.
+ * The landing page (v4, 2026-08-01) follows docs/landing-page-brief.md's
+ * "monumental image / technical marginalia" direction: near-monochrome ground
+ * with ONE warm accent (amber, evoking platform signal lights -- not an
+ * arbitrary brand color), one monumental hero image (a crafted dark scene
+ * standing in for real photography -- see HeroScene.tsx), extreme type
+ * contrast (huge display / tiny mono labels), technical marginalia
+ * (coordinates, plate numbers, timestamps). No gradients-as-decoration, no
+ * evenly-distributed colorful palettes, no rounded-everything friendliness.
  */
 :root {
   color-scheme: dark;
@@ -29,16 +30,19 @@
   --status-serious: #ec835a;
   --status-critical: #d03b3b;
 
-  --accent: #3987e5; /* categorical slot 1 (blue), dark step */
+  --accent: #3987e5; /* categorical slot 1 (blue), dark step -- /dashboard only */
 
-  /* Brand surfaces -- tinted, not pure black/white (impeccable rule). */
-  --ink: #16141b; /* tinted near-black, violet undertone */
-  --ink-raised: #1e1b24;
-  --lavender: #b9aee0;
-  --lavender-deep: #8f80c2;
-  --rose: #e7b8c4;
-  --rose-deep: #d891a3;
-  --cream: #f3efe9;
+  /* Landing page brand surface: tinted near-black with a warm undertone
+     (never pure #000, per the impeccable skill), a warm paper ink, and one
+     amber accent used sparingly. */
+  --ink: #0c0a08;
+  --ink-raised: #171310;
+  --paper: #f1ece2;
+  --paper-dim: rgba(241, 236, 226, 0.6);
+  --paper-faint: rgba(241, 236, 226, 0.35);
+  --signal: #c9772e;
+  --signal-dim: rgba(201, 119, 46, 0.5);
+  --hairline: rgba(241, 236, 226, 0.14);
 
   --font-display: var(--font-bricolage);
   --font-sans: var(--font-geist-sans);
@@ -102,33 +106,21 @@ body {
 }
 
 ::selection {
-  background: var(--lavender-deep);
-  color: white;
+  background: var(--signal);
+  color: var(--ink);
 }
 
-/* --- Brand sections (landing page only) --- */
+/* --- Landing page brand surface --- */
 
 .section-ink {
   background: var(--ink);
-  color: #f4f2f8;
+  color: var(--paper);
   position: relative;
 }
 
-.section-lavender {
-  background: var(--lavender);
-  color: var(--ink);
-  position: relative;
-}
-
-.section-rose {
-  background: var(--rose);
-  color: var(--ink);
-  position: relative;
-}
-
-/* Film-grain texture: an SVG fractal-noise tile, applied as a repeating
-   background at low opacity via a pseudo-element so it layers over any
-   section color without extra markup. */
+/* Film-grain texture -- an SVG fractal-noise tile, applied as a repeating
+   background at low opacity via a pseudo-element. Processed, not flat --
+   per the brief's guardrail against untextured/clean surfaces. */
 .grain::before {
   content: "";
   position: absolute;
@@ -139,27 +131,26 @@ body {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   background-size: 180px 180px;
 }
-.section-lavender.grain::before,
-.section-rose.grain::before {
-  opacity: 0.08;
-  mix-blend-mode: multiply;
-}
 
-/* Floating pill navigation. */
-.pill-nav {
-  border-radius: 9999px;
-  background: var(--ink);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 30px -8px rgba(0, 0, 0, 0.5);
-}
-
-/* Oversized wordmark divider. */
-.wordmark {
+/* Monumental display type. */
+.type-monumental {
   font-family: var(--font-display), sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 0.85;
-  text-transform: lowercase;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 0.98;
+}
+
+/* Tiny technical marginalia -- coordinates, plate numbers, timestamps. */
+.marginalia {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  line-height: 1.8;
+  color: var(--paper-dim);
+}
+
+.marginalia .marginalia-accent {
+  color: var(--signal);
 }
 
 @media (prefers-reduced-motion: reduce) {

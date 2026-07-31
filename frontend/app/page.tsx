@@ -1,164 +1,168 @@
 "use client";
 
-import { useRef } from "react";
-import Link from "next/link";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion } from "motion/react";
 import HeroLiveStat from "@/components/HeroLiveStat";
-import PillNav from "@/components/PillNav";
+import HeroScene from "@/components/HeroScene";
 import PipelineDiagram from "@/components/PipelineDiagram";
-import StationIllustration from "@/components/StationIllustration";
-import { LINE_COLORS } from "@/lib/lineColors";
+import TopNav from "@/components/TopNav";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
   show: { opacity: 1, y: 0 },
 };
 
-const STEP_ACCENTS = ["#e7b8c4", "#b9aee0", "#f4f2f8"];
-
 export default function LandingPage() {
-  const illustrationRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: illustrationRef,
-    offset: ["start end", "end start"],
-  });
-  const illustrationY = useTransform(scrollYProgress, [0, 1], [40, -40]);
-
   return (
-    <div className="flex-1 flex flex-col">
-      <PillNav />
+    <div className="flex-1 flex flex-col section-ink grain">
+      {/* Hero -- one monumental image, technical marginalia, extreme type */}
+      <section className="relative min-h-[92vh] flex items-end overflow-hidden">
+        <HeroScene />
+        <TopNav />
 
-      {/* Hero */}
-      <section className="section-ink grain overflow-hidden pt-36 pb-24 md:pt-44 md:pb-32">
-        <div className="relative max-w-5xl mx-auto px-6 text-center">
+        <div className="relative w-full max-w-6xl mx-auto px-6 md:px-10 pb-16 md:pb-20 grid md:grid-cols-[auto_1fr] gap-10 items-end">
           <motion.div
-            initial="hidden"
-            animate="show"
-            variants={{ show: { transition: { staggerChildren: 0.12 } } }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="marginalia hidden md:block whitespace-nowrap"
           >
+            <div>PLATE II — TRANSIT LEDGER</div>
+            <div>
+              40.7342°N <span className="marginalia-accent">·</span> 74.1645°W
+            </div>
+            <div>NEWARK PENN STATION</div>
+            <div>LIVE SINCE 2026-07-30</div>
+          </motion.div>
+
+          <div>
             <motion.h1
-              variants={fadeUp}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="wordmark text-6xl md:text-8xl mx-auto max-w-4xl"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="type-monumental text-5xl md:text-7xl max-w-2xl"
+              style={{ color: "var(--paper)" }}
             >
-              your train is late.
+              Your train is late.
               <br />
-              <span style={{ color: "var(--rose)" }}>you already knew that.</span>
+              You already knew that.
             </motion.h1>
+
             <motion.p
-              variants={fadeUp}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="mt-8 text-white/70 text-lg leading-relaxed max-w-lg mx-auto"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="mt-6 max-w-md text-base leading-relaxed"
+              style={{ color: "var(--paper-dim)" }}
             >
-              NJ Transit tells you a train is delayed after you&apos;re already standing
-              on the platform. OnTrack Newark predicts delay risk on Newark-area rail
-              lines before you leave the house, using NJ Transit&apos;s own public data.
+              NJ Transit tells you a train is delayed after you&apos;re already
+              standing on the platform. OnTrack Newark predicts delay risk on
+              Newark-area rail lines before you leave the house.
             </motion.p>
+
             <motion.div
-              variants={fadeUp}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="mt-10 flex flex-col items-center gap-6"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="mt-8 flex items-center gap-6 flex-wrap"
             >
-              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>
-                <Link
-                  href="/dashboard"
-                  className="inline-block rounded-full px-7 py-3.5 font-semibold text-base transition-shadow"
-                  style={{ background: "var(--rose)", color: "var(--ink)" }}
-                >
-                  View live dashboard
-                </Link>
-              </motion.div>
-              <div className="flex items-center gap-3 font-mono text-xs text-white/50 flex-wrap justify-center">
-                {["NEC", "NJCL", "RARV", "BNTN", "MNE", "MNEG"].map((code) => (
-                  <span key={code} className="flex items-center gap-1.5">
-                    <span
-                      className="inline-block w-2 h-2 rounded-full"
-                      style={{ background: LINE_COLORS[code] }}
-                    />
-                    {code}
-                  </span>
-                ))}
-              </div>
+              <a
+                href="/dashboard"
+                className="font-mono text-xs tracking-[0.1em] px-6 py-3 border transition-colors"
+                style={{ borderColor: "var(--paper)", color: "var(--paper)" }}
+              >
+                VIEW LIVE DASHBOARD
+              </a>
+              <a
+                href="#ledger"
+                className="font-mono text-xs tracking-[0.1em]"
+                style={{ color: "var(--paper-dim)" }}
+              >
+                READ THE LEDGER ↓
+              </a>
             </motion.div>
-          </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-14 flex justify-center"
-          >
-            <HeroLiveStat />
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="mt-10 max-w-sm"
+            >
+              <HeroLiveStat />
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Illustration block */}
-      <section className="section-lavender grain overflow-hidden" ref={illustrationRef}>
-        <div className="relative max-w-4xl mx-auto px-6 py-20">
-          <motion.div style={{ y: illustrationY }}>
-            <StationIllustration />
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Problem */}
+      {/* The problem */}
       <motion.section
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, margin: "-80px" }}
         variants={fadeUp}
         transition={{ duration: 0.6 }}
-        className="section-ink grain"
+        className="border-t"
+        style={{ borderColor: "var(--hairline)" }}
       >
-        <div className="relative max-w-5xl mx-auto px-6 py-20">
-          <p className="font-mono text-xs text-white/40 uppercase tracking-wider">
-            The problem
-          </p>
-          <p className="mt-4 text-2xl md:text-4xl font-display font-medium leading-snug max-w-2xl">
-            Every Newark commuter has a story about a delay that had no warning. NJ
-            Transit&apos;s own real-time feed already knows a train is running behind —
-            it just doesn&apos;t tell you what tomorrow&apos;s 8:14 is likely to do.
+        <div className="max-w-6xl mx-auto px-6 md:px-10 py-20 md:py-28">
+          <p className="marginalia mb-6">§ 01 — THE PROBLEM</p>
+          <p
+            className="type-monumental text-2xl md:text-4xl max-w-3xl"
+            style={{ color: "var(--paper)" }}
+          >
+            Every Newark commuter has a story about a delay that had no
+            warning. NJ Transit&apos;s own real-time feed already knows a
+            train is running behind — it just doesn&apos;t tell you what
+            tomorrow&apos;s 8:14 is likely to do.
           </p>
         </div>
       </motion.section>
 
-      {/* How it works */}
-      <section id="how" className="section-ink grain border-t border-white/10">
-        <div className="relative max-w-5xl mx-auto px-6 py-20">
-          <motion.p
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            variants={fadeUp}
-            transition={{ duration: 0.5 }}
-            className="font-mono text-xs text-white/40 uppercase tracking-wider mb-8"
-          >
-            How it works
-          </motion.p>
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            <Step
-              n="01"
-              accent={STEP_ACCENTS[0]}
-              title="Ingest"
-              body="Poll NJ Transit's public GTFS-RT feed and NWS weather every 60-120s. Every reading lands in Postgres, timestamped."
-              delay={0}
-            />
-            <Step
-              n="02"
-              accent={STEP_ACCENTS[1]}
-              title="Predict"
-              body="A model trained on accumulated delay history, weather, and time-of-day scores upcoming departures for delay risk."
-              delay={0.12}
-            />
-            <Step
-              n="03"
-              accent={STEP_ACCENTS[2]}
-              title="Display"
-              body="Live status and predicted risk, per line, refreshed continuously — the dashboard your commute deserves."
-              delay={0.24}
-            />
+      {/* How it works / ledger */}
+      <section id="ledger" className="border-t" style={{ borderColor: "var(--hairline)" }}>
+        <div className="max-w-6xl mx-auto px-6 md:px-10 py-20 md:py-28">
+          <p className="marginalia mb-10">§ 02 — HOW IT WORKS</p>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-14">
+            {[
+              {
+                n: "01",
+                title: "Ingest",
+                body: "Poll NJ Transit's public GTFS-RT feed and NWS weather every 5 minutes. Every reading lands in Postgres, timestamped.",
+              },
+              {
+                n: "02",
+                title: "Predict",
+                body: "A model trained on accumulated delay history, weather, and time-of-day scores upcoming departures for delay risk.",
+              },
+              {
+                n: "03",
+                title: "Display",
+                body: "Live status and predicted risk, per line, refreshed continuously.",
+              },
+            ].map((step, i) => (
+              <motion.div
+                key={step.n}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.12 }}
+              >
+                <p className="font-mono text-xs mb-2" style={{ color: "var(--signal)" }}>
+                  {step.n}
+                </p>
+                <h3
+                  className="type-monumental text-xl mb-2"
+                  style={{ color: "var(--paper)" }}
+                >
+                  {step.title}
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--paper-dim)" }}>
+                  {step.body}
+                </p>
+              </motion.div>
+            ))}
           </div>
+
           <motion.div
             initial="hidden"
             whileInView="show"
@@ -171,15 +175,15 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Big wordmark divider */}
-      <section className="section-ink grain border-t border-white/10 flex items-center justify-center py-24 md:py-32">
+      {/* Wordmark divider */}
+      <section className="border-t flex items-center justify-center py-24 md:py-32" style={{ borderColor: "var(--hairline)" }}>
         <motion.span
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="wordmark text-7xl md:text-[10rem]"
-          style={{ color: "var(--lavender)" }}
+          transition={{ duration: 0.8 }}
+          className="type-monumental text-7xl md:text-[9rem]"
+          style={{ color: "transparent", WebkitTextStroke: "1px var(--hairline)" }}
         >
           ontrack
         </motion.span>
@@ -187,28 +191,33 @@ export default function LandingPage() {
 
       {/* Founder note */}
       <motion.section
-        id="why"
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, margin: "-80px" }}
         variants={fadeUp}
         transition={{ duration: 0.6 }}
-        className="section-rose grain"
+        className="border-t"
+        style={{ borderColor: "var(--hairline)" }}
       >
-        <div className="relative max-w-5xl mx-auto px-6 py-20">
-          <p className="font-mono text-xs text-[var(--ink)]/50 uppercase tracking-wider mb-6">
-            Why I&apos;m building this
-          </p>
-          <div className="rounded-2xl bg-[var(--ink)] text-white/90 font-mono text-sm p-7 max-w-2xl leading-relaxed">
-            <p className="text-white/40">$ cat founder_note.txt</p>
-            <p className="mt-3">
-              I&apos;m an AI data analyst and international student living in Newark. I
-              ride these lines. NJ Transit&apos;s data is public and genuinely good —
-              nobody had built the forward-looking layer on top of it yet, so I did.
-              This is an active build: the ingestion pipeline is live, the prediction
-              model ships once enough real delay history has accumulated. Follow the
-              build in the{" "}
-              <a href="https://github.com" className="underline hover:text-white">
+        <div className="max-w-6xl mx-auto px-6 md:px-10 py-20 md:py-28">
+          <p className="marginalia mb-6">§ 03 — WHY I&apos;M BUILDING THIS</p>
+          <div
+            className="border font-mono text-sm p-7 max-w-2xl leading-relaxed"
+            style={{ borderColor: "var(--hairline)", background: "var(--ink-raised)" }}
+          >
+            <p style={{ color: "var(--paper-dim)" }}>$ cat founder_note.txt</p>
+            <p className="mt-3" style={{ color: "var(--paper)" }}>
+              I&apos;m an AI data analyst and international student living in
+              Newark. I ride these lines. NJ Transit&apos;s data is public and
+              genuinely good — nobody had built the forward-looking layer on
+              top of it yet, so I did. This is an active build: the ingestion
+              pipeline is live, the prediction model ships once enough real
+              delay history has accumulated. Follow the build in the{" "}
+              <a
+                href="https://github.com/senseikartikey/ontrack-newark"
+                className="underline"
+                style={{ color: "var(--paper)" }}
+              >
                 GitHub repo
               </a>
               &apos;s engineering log.
@@ -217,46 +226,20 @@ export default function LandingPage() {
         </div>
       </motion.section>
 
-      <footer className="section-ink grain border-t border-white/10 mt-auto">
-        <div className="relative max-w-5xl mx-auto px-6 py-8 flex items-center justify-between text-xs text-white/40 font-mono">
+      <footer className="border-t mt-auto" style={{ borderColor: "var(--hairline)" }}>
+        <div
+          className="max-w-6xl mx-auto px-6 md:px-10 py-8 flex items-center justify-between text-xs font-mono"
+          style={{ color: "var(--paper-dim)" }}
+        >
           <span>Built on public NJ Transit + NWS data. No PII collected.</span>
-          <a href="https://github.com" className="hover:text-white">
+          <a
+            href="https://github.com/senseikartikey/ontrack-newark"
+            style={{ color: "var(--paper)" }}
+          >
             GitHub
           </a>
         </div>
       </footer>
     </div>
-  );
-}
-
-function Step({
-  n,
-  accent,
-  title,
-  body,
-  delay,
-}: {
-  n: string;
-  accent: string;
-  title: string;
-  body: string;
-  delay: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay }}
-      whileHover={{ y: -4 }}
-      className="pl-4"
-      style={{ borderLeft: `2px solid ${accent}` }}
-    >
-      <span className="font-mono text-xs font-semibold" style={{ color: accent }}>
-        {n}
-      </span>
-      <h3 className="font-display font-semibold text-lg mt-1 text-white">{title}</h3>
-      <p className="text-white/60 text-sm mt-2 leading-relaxed">{body}</p>
-    </motion.div>
   );
 }
