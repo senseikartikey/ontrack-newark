@@ -2,8 +2,8 @@
 
 Owned by `frontend-engineer-agent`. Next.js (App Router, TypeScript, Tailwind) app: the public landing page and the live dashboard.
 
-## Status (Week 2)
-- **Landing page** (`app/page.tsx`): built per `docs/landing-page-brief.md` — dark-mode-first, live status panel in the hero (gracefully degrades when the API isn't reachable), scroll-through "how it works," a hand-built pipeline diagram, and a terminal-styled founder note. Verified in-browser in both dark and light theme.
+## Status (Week 2, revised)
+- **Landing page** (`app/page.tsx`): built per `docs/landing-page-brief.md` — dark-mode-first, an animated color-coded SVG diagram of the real Newark rail network as the hero's primary visual, a slow-drifting multi-hue aurora background, gradient hero typography, `motion`-driven scroll reveals and hover micro-interactions, and a terminal-styled founder note. Each of the 6 Newark-area lines has a fixed identity color (`lib/lineColors.ts`, from the `dataviz` skill's categorical palette) used consistently across the hero map, the "how it works" accents, the pipeline diagram, and the dashboard's line pills. The first pass (all-monochrome, no motion) read as boring rather than restrained — see `ENGINEERING_LOG.md` (2026-07-30) for the correction. Verified in-browser in both dark and light theme.
 - **Dashboard** (`app/dashboard/page.tsx`): line picker + live status table, polling `/lines` and `/lines/{line}/live` every 30s. Verified end-to-end against a running local backend.
 - Design tokens in `app/globals.css` follow the `dataviz` skill's validated palette — status colors (`--status-good`/`--status-critical`) map directly onto on-time/delay semantics.
 - `/lines/{line}/predict` and `/lines/{line}/scorecard` UI lands once `/backend` serves them (Week 3-4).

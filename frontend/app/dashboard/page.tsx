@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getLines, getLiveStatus, type Line, type LiveTrip } from "@/lib/api";
 import ThemeToggle from "@/components/ThemeToggle";
+import { colorForLine } from "@/lib/lineColors";
 
 function formatDelay(seconds: number | null) {
   if (seconds === null) return { text: "—", color: "var(--text-muted)" };
@@ -70,23 +71,31 @@ export default function DashboardPage() {
         )}
 
         <div className="flex flex-wrap gap-2 mb-8">
-          {lines.map((line) => (
-            <button
-              key={line.code}
-              onClick={() => {
-                setSelected(line.code);
-                setTrips(null);
-              }}
-              className="font-mono text-xs px-3 py-1.5 rounded-full border transition-colors"
-              style={{
-                borderColor: "var(--border)",
-                background: selected === line.code ? "var(--accent)" : "transparent",
-                color: selected === line.code ? "white" : "var(--text-secondary)",
-              }}
-            >
-              {line.code} · {line.display_name}
-            </button>
-          ))}
+          {lines.map((line) => {
+            const color = colorForLine(line.code);
+            const isSelected = selected === line.code;
+            return (
+              <button
+                key={line.code}
+                onClick={() => {
+                  setSelected(line.code);
+                  setTrips(null);
+                }}
+                className="font-mono text-xs px-3 py-1.5 rounded-full border flex items-center gap-1.5 transition-all hover:-translate-y-0.5"
+                style={{
+                  borderColor: isSelected ? color : "var(--border)",
+                  background: isSelected ? color : "transparent",
+                  color: isSelected ? "white" : "var(--text-secondary)",
+                }}
+              >
+                <span
+                  className="inline-block w-1.5 h-1.5 rounded-full"
+                  style={{ background: isSelected ? "white" : color }}
+                />
+                {line.code} · {line.display_name}
+              </button>
+            );
+          })}
         </div>
 
         <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden">

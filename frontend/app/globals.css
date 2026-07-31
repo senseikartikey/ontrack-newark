@@ -25,7 +25,7 @@
 
   --accent: #3987e5; /* categorical slot 1 (blue), dark step */
 
-  --font-display: var(--font-space-grotesk);
+  --font-display: var(--font-bricolage);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -89,4 +89,72 @@ body {
 ::selection {
   background: var(--accent);
   color: white;
+}
+
+/* Gradient text treatment for hero accent phrases -- pulls from the same
+   categorical hues used for line identity, so it reads as part of the same
+   system rather than an arbitrary marketing gradient. */
+.text-gradient {
+  background: linear-gradient(90deg, #3987e5, #d55181 50%, #9085e9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Slow-drifting aurora glow behind the hero. Three blurred radial blobs in
+   categorical hues, each on its own long, gently eased loop so they never
+   fall into sync. */
+@keyframes aurora-drift-1 {
+  0%, 100% { transform: translate(-10%, -10%) scale(1); }
+  50% { transform: translate(8%, 6%) scale(1.15); }
+}
+@keyframes aurora-drift-2 {
+  0%, 100% { transform: translate(10%, 5%) scale(1.05); }
+  50% { transform: translate(-6%, -8%) scale(1.2); }
+}
+@keyframes aurora-drift-3 {
+  0%, 100% { transform: translate(0%, 10%) scale(1.1); }
+  50% { transform: translate(-8%, -4%) scale(0.95); }
+}
+
+.aurora-blob {
+  position: absolute;
+  width: 40rem;
+  height: 40rem;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.28;
+}
+:root[data-theme="light"] .aurora-blob {
+  opacity: 0.16;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .aurora-blob {
+    opacity: 0.16;
+  }
+}
+
+.aurora-blob-1 {
+  top: -10rem;
+  left: -6rem;
+  background: #3987e5;
+  animation: aurora-drift-1 22s ease-in-out infinite;
+}
+.aurora-blob-2 {
+  top: -14rem;
+  right: -10rem;
+  background: #d55181;
+  animation: aurora-drift-2 26s ease-in-out infinite;
+}
+.aurora-blob-3 {
+  top: 4rem;
+  left: 30%;
+  background: #9085e9;
+  animation: aurora-drift-3 30s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob {
+    animation: none;
+  }
 }

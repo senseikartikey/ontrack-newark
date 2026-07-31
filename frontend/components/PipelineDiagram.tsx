@@ -1,9 +1,9 @@
 const STAGES = [
-  { label: "GTFS-RT + weather", detail: "NJ Transit RailData API, NWS" },
-  { label: "Postgres", detail: "trip_updates, weather_hourly" },
-  { label: "LightGBM", detail: "delay risk, precomputed" },
-  { label: "FastAPI", detail: "cached endpoints" },
-  { label: "Dashboard", detail: "this page" },
+  { label: "GTFS-RT + weather", detail: "NJ Transit RailData API, NWS", accent: "#3987e5" },
+  { label: "Postgres", detail: "trip_updates, weather_hourly", accent: "#199e70" },
+  { label: "LightGBM", detail: "delay risk, precomputed", accent: "#d55181" },
+  { label: "FastAPI", detail: "cached endpoints", accent: "#9085e9" },
+  { label: "Dashboard", detail: "this page", accent: "#c98500" },
 ];
 
 export default function PipelineDiagram() {
@@ -12,7 +12,10 @@ export default function PipelineDiagram() {
       <div className="flex items-stretch gap-0 min-w-[720px] font-mono text-xs">
         {STAGES.map((stage, i) => (
           <div key={stage.label} className="flex items-stretch">
-            <div className="flex flex-col justify-center rounded-md border border-[var(--border)] bg-[var(--surface)] px-4 py-3 min-w-[140px]">
+            <div
+              className="flex flex-col justify-center rounded-md border border-[var(--border)] bg-[var(--surface)] px-4 py-3 min-w-[140px] transition-transform hover:-translate-y-0.5"
+              style={{ borderTop: `2px solid ${stage.accent}` }}
+            >
               <span className="text-[var(--text-primary)] font-semibold">{stage.label}</span>
               <span className="text-[var(--text-muted)] mt-1">{stage.detail}</span>
             </div>

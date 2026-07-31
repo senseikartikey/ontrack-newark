@@ -4,6 +4,8 @@ OnTrack Newark is built by a small team of specialized Claude Code subagents ins
 
 Agent definitions live in `.claude/agents/*.md`.
 
+**Known limitation (2026-07-30):** in the session that authored these files, the `Agent` tool did not recognize any of these custom subagent names (`Agent type '...' not found. Available agents: claude, claude-code-guide, Explore, general-purpose, Plan, statusline-setup`) — only a fixed built-in list was invokable. If you're picking this up in a new session, check whether `subagent_type: "data-engineer-agent"` (etc.) actually resolves before assuming real delegation is happening. If it still doesn't, work through each department's brief directly (as self-instruction) and say so plainly in `ENGINEERING_LOG.md` rather than implying a separate agent ran it — that's what happened for all Week 1/Week 2 work in this repo so far.
+
 ## The team
 
 ### `pm-agent`
