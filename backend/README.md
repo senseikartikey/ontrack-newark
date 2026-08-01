@@ -6,7 +6,7 @@ Owned by `backend-engineer-agent`. FastAPI app serving live status, predictions,
 - `GET /health` — liveness check.
 - `GET /lines` — list of in-scope Newark-area lines.
 - `GET /lines/{line}/live` — most recent trip_updates reading per trip, within a 30-minute window.
-- `GET /lines/{line}/predict` — v1 statistical baseline lookup for the current hour/day-of-week. Returns `{"status": "insufficient_data", ...}` honestly rather than a fabricated number when `/ml` hasn't computed a trustworthy bucket yet.
+- `GET /lines/{line}/predict` — prefers a v2 LightGBM prediction (`ml_predictions`) over the v1 statistical baseline (`delay_baseline`) when both exist for the current hour/day-of-week, since `/ml` only ever writes a v2 bucket after it's beaten the baseline on held-out data. Falls back to the baseline, then to an honest `{"status": "insufficient_data", ...}` rather than a fabricated number. The response includes `"source": "ml_model" | "statistical_baseline"` so callers know which one they got.
 - `GET /lines/{line}/scorecard` — rolling 7/30-day on-time %, deduplicated to one reading per (trip, calendar day) so a trip re-polled every 5 minutes doesn't get counted repeatedly. Always includes `sample_size` so the frontend can hedge on a small sample.
 - `GET /alerts?line=` — active service alerts, optionally filtered by line.
 

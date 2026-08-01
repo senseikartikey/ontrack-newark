@@ -1,4 +1,4 @@
-name: Recompute delay baseline
+name: Recompute delay baseline and retrain model
 
 # Daily -- the underlying delay distribution shifts slowly, so there's no value
 # recomputing more often than the ingestion data itself meaningfully changes.
@@ -26,4 +26,10 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python compute_baseline.py
+
+      - name: Train v2 model (skips itself if there's not enough data yet)
+        working-directory: ml
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python train_model.py
 

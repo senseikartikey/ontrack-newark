@@ -263,7 +263,10 @@ export default function DashboardPage() {
               <span className="text-[var(--text-secondary)] text-sm">
                 Historically ~{Math.round(prediction.predicted_delay_seconds / 60)} min
                 delay for this line around this time, based on {prediction.sample_size}{" "}
-                observed trips.
+                observed trips.{" "}
+                <span className="font-mono text-xs text-[var(--text-muted)]">
+                  ({prediction.source === "ml_model" ? "v2 model" : "v1 statistical baseline"})
+                </span>
               </span>
             </div>
           )}

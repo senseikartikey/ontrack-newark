@@ -55,8 +55,10 @@ Running history of what was built and what broke: see [`ENGINEERING_LOG.md`](ENG
 
 **Week 5 done, full endpoint set live.** Repo: [github.com/senseikartikey/ontrack-newark](https://github.com/senseikartikey/ontrack-newark) (public). Supabase Postgres connected (pooler endpoint). NJ Transit RailData access approved 2026-08-01 — real GTFS-RT delay data, service alerts, weather, and static GTFS are all flowing into production on schedule via GitHub Actions (`Ingest live data` every 5 min, `Refresh static GTFS` weekly, `Recompute delay baseline` daily). Backend now serves the full planned endpoint set (`/lines`, `/live`, `/predict`, `/scorecard`, `/alerts`); frontend (landing page v4 + dashboard with predicted-risk, scorecard, and alerts panels) verified against real data. Root `README.md` has a real architecture diagram; `docs/demo-script.md` exists for conference use.
 
+**v2 model pipeline built** (`ml/train_model.py`, `ml/features.py`) and logic-verified against synthetic data (model clearly beat a synthetic baseline in a controlled test). Runs daily via GitHub Actions alongside the baseline recompute; correctly detects real data is still far below the training threshold (47 rows vs. a 500-row minimum) and skips itself rather than training garbage. Backend's `/predict` already prefers a v2 prediction over the baseline whenever one exists, so no further backend work is needed once real training succeeds.
+
 **What's next**:
-- `/ml`'s baseline needs real accumulated history (days/weeks) before any bucket clears `MIN_SAMPLES_THRESHOLD` — waiting for data now, not blocked on access. Once enough exists, train the v2 LightGBM model per the plan's Week 4.
+- Purely a waiting game now: once enough real trip history accumulates, `train_model.py`'s next scheduled run will train for real and start serving v2 predictions automatically — no manual step required.
 - No public hosted URL yet — backend/frontend deployment (Render/Railway + Vercel) was never actually done despite being in the original plan; still local-only. See root `README.md`'s "What's next."
 
 See `ENGINEERING_LOG.md` for full details and the plan file for the 4-6 week build sequence.

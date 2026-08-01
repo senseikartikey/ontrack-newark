@@ -11,7 +11,7 @@ from config import (
     RISK_MEDIUM_MAX_SECONDS,
 )
 from db import get_db
-from models import DelayBaseline, TripUpdate
+from models import DelayBaseline, MLPrediction, TripUpdate
 
 router = APIRouter(prefix="/lines", tags=["lines"])
 
@@ -78,18 +78,34 @@ def _risk_level(avg_delay_seconds: float) -> str:
 @router.get("/{line}/predict")
 def get_predicted_risk(line: str, db: Session = Depends(get_db)):
     """
-    v1 statistical baseline only (see /ml/README.md) -- looks up the
-    (line, hour_of_day, day_of_week) bucket for the current time. Returns an
-    honest "insufficient_data" status rather than fabricating a number when
-    /ml hasn't computed a trustworthy bucket yet (which, as of this endpoint
-    shipping, is all of them -- ingestion has no real delay history yet).
+    Prefers the v2 LightGBM model (ml_predictions) if train_model.py has written
+    a bucket for this line/hour/day-of-week -- it's only ever written once the
+    model both cleared a minimum training-data threshold and beat the v1
+    statistical baseline on a held-out test set, so "it exists" already implies
+    "it's trustworthy enough to prefer." Falls back to the v1 baseline, then to
+    an honest "insufficient_data" status rather than fabricating a number.
     """
     if line not in NEWARK_AREA_LINES:
         raise HTTPException(status_code=404, detail=f"Unknown line: {line}")
 
     now = datetime.now(timezone.utc)
-    baseline = db.get(DelayBaseline, (line, now.hour, now.weekday()))
 
+    ml_prediction = db.get(MLPrediction, (line, now.hour, now.weekday()))
+    if ml_prediction is not None:
+        return {
+            "line": line,
+            "status": "ok",
+            "source": "ml_model",
+            "model_version": ml_prediction.model_version,
+            "predicted_delay_seconds": round(ml_prediction.predicted_delay_seconds),
+            "risk_level": _risk_level(ml_prediction.predicted_delay_seconds),
+            "sample_size": ml_prediction.sample_size,
+            "mae_seconds": round(ml_prediction.mae_seconds, 1),
+            "baseline_mae_seconds": round(ml_prediction.baseline_mae_seconds, 1),
+            "computed_at": ml_prediction.computed_at,
+        }
+
+    baseline = db.get(DelayBaseline, (line, now.hour, now.weekday()))
     if baseline is None:
         return {
             "line": line,
@@ -100,6 +116,7 @@ def get_predicted_risk(line: str, db: Session = Depends(get_db)):
     return {
         "line": line,
         "status": "ok",
+        "source": "statistical_baseline",
         "predicted_delay_seconds": round(baseline.avg_delay_seconds),
         "risk_level": _risk_level(baseline.avg_delay_seconds),
         "sample_size": baseline.sample_size,

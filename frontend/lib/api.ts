@@ -21,10 +21,14 @@ export type PredictedRisk =
   | {
       line: string;
       status: "ok";
+      source: "statistical_baseline" | "ml_model";
       predicted_delay_seconds: number;
       risk_level: "low" | "medium" | "high";
       sample_size: number;
       computed_at: string;
+      model_version?: string;
+      mae_seconds?: number;
+      baseline_mae_seconds?: number;
     };
 
 export type Alert = {

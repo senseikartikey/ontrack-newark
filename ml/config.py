@@ -16,3 +16,14 @@ MIN_SAMPLES_THRESHOLD = 20
 RISK_LOW_MAX_SECONDS = 120
 RISK_MEDIUM_MAX_SECONDS = 300
 # anything above RISK_MEDIUM_MAX_SECONDS is "high"
+
+# v2 model: below this many total (deduplicated) training rows, train_model.py skips
+# training entirely rather than fitting (and potentially serving) an overfit model.
+# 500 is a starting guess reasoned from wanting a few dozen samples per line even
+# after a train/test split across ~6-8 lines -- not tuned against real data yet
+# (there isn't nearly enough yet); revisit once real volume exists.
+MIN_TRAINING_ROWS = 500
+
+# Fraction of rows (by time, not randomly -- see train_model.py) held out for
+# evaluating the model against the baseline.
+TEST_HOLDOUT_FRACTION = 0.2
