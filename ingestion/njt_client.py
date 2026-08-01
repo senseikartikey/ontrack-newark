@@ -1,13 +1,18 @@
 """
 Client for NJ Transit's RailData API.
 
-IMPORTANT — this module is a best-effort scaffold, not a verified integration.
-NJ Transit's RailData API docs are only visible after logging into
-https://developer.njtransit.com/registration/ and requesting RailData access.
-The auth pattern below (username/password -> bearer token, auto-refreshed) matches
-the shape used by public reference clients (e.g. github.com/jtarrio/raildata), but the
-exact endpoint paths are NOT yet confirmed. Every TODO below must be checked against
-the real API reference once you're registered, before this will actually work.
+Verified against the real API on 2026-08-01 (Kartikey's RailData access was
+approved) and cross-checked against a public reference implementation's actual
+source (github.com/jtarrio/raildata/api/{api,methods}.go), not just its README:
+- Base URL: https://raildata.njtransit.com/api/TrainData (test env at
+  testraildata.njtransit.com uses the same path shape).
+- Every method is POST, multipart/form-data (not JSON, not urlencoded), at
+  <base>/<methodName> e.g. .../TrainData/getToken.
+- getToken: request {username, password} -> response {Authenticated, UserToken}.
+- getVehicleData: request {token} -> response is a BARE JSON array (no wrapper
+  object) of train objects with fields ID, TRAIN_LINE, DIRECTION,
+  ICS_TRACK_CKT, LAST_MODIFIED, SCHED_DEP_TIME, SEC_LATE, NEXT_STOP,
+  LONGITUDE, LATITUDE.
 """
 from __future__ import annotations
 
@@ -25,6 +30,13 @@ TOKEN_REFRESH_MARGIN_SECONDS = 60
 class _Token:
     value: str
     expires_at: float  # unix timestamp
+
+
+def _multipart(fields: dict[str, str]) -> dict[str, tuple[None, str]]:
+    """NJT's API expects multipart/form-data, not the default urlencoded body --
+    this is the standard `requests` trick for sending plain form fields as
+    multipart (None filename = not a file attachment)."""
+    return {k: (None, v) for k, v in fields.items()}
 
 
 class NJTransitRailClient:
@@ -53,35 +65,30 @@ class NJTransitRailClient:
         return self._token.value
 
     def _fetch_token(self) -> _Token:
-        # TODO(data-engineer-agent): confirm the real token endpoint path and the
-        # expected request/response shape (field names for token + expiry) against
-        # the developer portal's RailData API reference.
         resp = self._session.post(
-            f"{self._base_url}/TrainData/getToken",
-            data={"username": self._username, "password": self._password},
+            f"{self._base_url}/getToken",
+            files=_multipart({"username": self._username, "password": self._password}),
             timeout=15,
         )
         resp.raise_for_status()
         body = resp.json()
-        # TODO: confirm actual response field names -- assuming a shape like
-        # {"UserToken": "...", "ExpirationTime": "..."} pending real docs.
-        token_value = body.get("UserToken") or body.get("token")
+        if not body.get("Authenticated"):
+            raise RuntimeError(f"NJT RailData authentication failed: {body!r}")
+        token_value = body.get("UserToken")
         if not token_value:
             raise RuntimeError(f"Unexpected token response shape: {body!r}")
-        # Fall back to a conservative 25-minute TTL if no expiry is present, so we
-        # refresh proactively rather than relying on an unconfirmed field.
+        # NJT doesn't return an explicit expiry -- refresh proactively on a
+        # conservative 25-minute assumed TTL rather than relying on one.
         expires_at = time.time() + 25 * 60
         return _Token(value=token_value, expires_at=expires_at)
 
-    def get_vehicle_data(self) -> dict:
-        """Fetch live rail vehicle/train position + status data."""
+    def get_vehicle_data(self) -> list[dict]:
+        """Fetch live rail vehicle/train position + status data. Returns a bare
+        list of train dicts (see module docstring for fields) -- not wrapped."""
         token = self._ensure_token()
-        # TODO(data-engineer-agent): confirm real endpoint path -- this is a
-        # best-effort guess based on the method name used by public reference
-        # clients (`GetVehicleData`), not a verified NJT path.
         resp = self._session.post(
-            f"{self._base_url}/TrainData/getVehicleData",
-            data={"token": token},
+            f"{self._base_url}/getVehicleData",
+            files=_multipart({"token": token}),
             timeout=15,
         )
         resp.raise_for_status()
@@ -90,11 +97,9 @@ class NJTransitRailClient:
     def get_train_schedule(self, station: str) -> dict:
         """Fetch scheduled/estimated departures for a given station."""
         token = self._ensure_token()
-        # TODO(data-engineer-agent): confirm real endpoint path and station
-        # identifier format (station code vs. full name) against the real docs.
         resp = self._session.post(
-            f"{self._base_url}/TrainData/getTrainSchedule",
-            data={"token": token, "station": station},
+            f"{self._base_url}/getTrainSchedule",
+            files=_multipart({"token": token, "station": station}),
             timeout=15,
         )
         resp.raise_for_status()

@@ -1,49 +1,41 @@
 """
 Entrypoint: fetch live NJ Transit rail vehicle data and upsert delay readings into
-trip_updates. Run on a schedule (every 60-120s) by the GitHub Actions workflow in /infra.
+trip_updates. Run on a schedule (every 5 min) by the GitHub Actions workflow in /infra.
 
-STATUS: blocked on real NJT RailData API credentials/response shape. The parsing logic
-below (`_extract_trip_updates`) is a best-effort placeholder based on the field names
-NJT's API is commonly documented to use (trip/train ID, line, station, scheduled vs.
-estimated time). Once NJT_USERNAME/NJT_PASSWORD are set and njt_client.py's endpoints
-are confirmed (see its TODOs), run this once, print the raw response, and correct
-`_extract_trip_updates` to match the actual JSON shape before trusting its output.
+Verified against the real API on 2026-08-01 (Kartikey's RailData access was
+approved). `get_vehicle_data()` returns a bare list of dicts like:
+    {"ID": "67", "TRAIN_LINE": "Main Line", "DIRECTION": "Westbound",
+     "ICS_TRACK_CKT": "RJ-193-1TK", "LAST_MODIFIED": "31-Jul-2026 10:39:10 PM",
+     "SCHED_DEP_TIME": "31-Jul-2026 10:42:45 PM", "SEC_LATE": "32",
+     "NEXT_STOP": "Ridgewood", "LONGITUDE": "-74.120592", "LATITUDE": "40.980629"}
+
+Confirmed live by listing every distinct TRAIN_LINE across all currently-running
+trains system-wide -- see config.py's TRAIN_LINE_TO_CODE for the verified mapping
+from these full descriptive names to our route_short_name codes.
 """
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 from sqlalchemy.dialects.postgresql import insert
 
-from config import NEWARK_AREA_LINES
+from config import TRAIN_LINE_TO_CODE
 from db import get_session, init_db
 from models import TripUpdate
 from njt_client import NJTransitRailClient
 
+# NJT's timestamps are US Eastern local time, formatted like "31-Jul-2026 10:42:45 PM".
+_NJT_TZ = ZoneInfo("America/New_York")
+_NJT_TIME_FORMAT = "%d-%b-%Y %I:%M:%S %p"
 
-def _extract_trip_updates(raw: dict) -> list[dict]:
-    """Turn the raw NJT vehicle-data response into a flat list of trip update dicts.
 
-    TODO(data-engineer-agent): replace this once the real response shape is known.
-    Placeholder assumes something like {"TRAIN_DATA": [{"TRAIN_ID", "LINE", "STATION",
-    "SCHED_DEP_DATE", "SEC_LATE", ...}, ...]} based on commonly-referenced NJT field
-    naming conventions -- NOT verified.
-    """
-    updates = []
-    for train in raw.get("TRAIN_DATA", []):
-        line = train.get("LINE") or train.get("LINEABBREVIATION")
-        if NEWARK_AREA_LINES and line not in NEWARK_AREA_LINES:
-            continue
-        updates.append(
-            {
-                "trip_id": str(train.get("TRAIN_ID", "")),
-                "line": line,
-                "direction": train.get("DIRECTION"),
-                "stop_id": train.get("STATION") or train.get("STATION_2CHAR"),
-                "scheduled_time": train.get("SCHED_DEP_DATE"),
-                "actual_time": train.get("STATION_POSITION") or train.get("SCHED_DEP_DATE"),
-                "delay_seconds": _to_int(train.get("SEC_LATE")),
-            }
-        )
-    return updates
+def _parse_njt_time(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        naive = datetime.strptime(value, _NJT_TIME_FORMAT)
+    except ValueError:
+        return None
+    return naive.replace(tzinfo=_NJT_TZ)
 
 
 def _to_int(value) -> int | None:
@@ -53,17 +45,57 @@ def _to_int(value) -> int | None:
         return None
 
 
+def _extract_trip_updates(trains: list[dict]) -> list[dict]:
+    """Filter live vehicle data down to Newark-area lines and normalize field names.
+
+    Note on `stop_id`: NEXT_STOP is a human-readable station name (e.g. "Ridgewood"),
+    not the numeric stop_id static GTFS uses (e.g. "107") -- the two ID systems don't
+    line up, and there's no reliable join key without a name-matching layer we haven't
+    built. We store the station name as-is; it's more immediately useful to a reader
+    than an opaque numeric ID would be anyway.
+    """
+    updates = []
+    for train in trains:
+        code = TRAIN_LINE_TO_CODE.get(train.get("TRAIN_LINE", ""))
+        if code is None:
+            continue
+
+        scheduled_time = _parse_njt_time(train.get("SCHED_DEP_TIME"))
+        if scheduled_time is None:
+            continue
+
+        delay_seconds = _to_int(train.get("SEC_LATE"))
+        actual_time = (
+            scheduled_time + timedelta(seconds=delay_seconds)
+            if delay_seconds is not None
+            else scheduled_time
+        )
+
+        updates.append(
+            {
+                "trip_id": str(train.get("ID", "")),
+                "line": code,
+                "direction": train.get("DIRECTION"),
+                "stop_id": train.get("NEXT_STOP"),
+                "scheduled_time": scheduled_time,
+                "actual_time": actual_time,
+                "delay_seconds": delay_seconds,
+            }
+        )
+    return updates
+
+
 def run() -> int:
     init_db()
     client = NJTransitRailClient()
-    raw = client.get_vehicle_data()
-    updates = _extract_trip_updates(raw)
+    trains = client.get_vehicle_data()
+    updates = _extract_trip_updates(trains)
     now = datetime.now(timezone.utc)
     rows_written = 0
 
     with get_session() as session:
         for u in updates:
-            if not u["trip_id"] or not u["scheduled_time"]:
+            if not u["trip_id"] or not u["stop_id"]:
                 continue
             stmt = insert(TripUpdate).values(
                 trip_id=u["trip_id"],
@@ -81,7 +113,7 @@ def run() -> int:
             session.execute(stmt)
             rows_written += 1
 
-    print(f"[poll_gtfs_rt] wrote {rows_written} trip update rows")
+    print(f"[poll_gtfs_rt] wrote {rows_written} trip update rows (of {len(trains)} total trains system-wide)")
     return rows_written
 
 

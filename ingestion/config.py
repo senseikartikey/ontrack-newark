@@ -10,7 +10,7 @@ DATABASE_URL = os.environ.get("DATABASE_URL", "")
 NJT_USERNAME = os.environ.get("NJT_USERNAME", "")
 NJT_PASSWORD = os.environ.get("NJT_PASSWORD", "")
 NJT_RAILDATA_BASE_URL = os.environ.get(
-    "NJT_RAILDATA_BASE_URL", "https://raildata.njtransit.com/api"
+    "NJT_RAILDATA_BASE_URL", "https://raildata.njtransit.com/api/TrainData"
 )
 
 WEATHER_USER_AGENT = os.environ.get(
@@ -50,3 +50,20 @@ NEWARK_AREA_LINES = [
     "MNE",    # Morris & Essex Line -- serves Newark Broad Street
     "MNEG",   # Gladstone Branch -- serves Newark Broad Street
 ]
+
+# getVehicleData's TRAIN_LINE field uses full descriptive names that do NOT match
+# static GTFS's route_short_name or even always its route_long_name exactly (e.g. the
+# live feed says "Northeast Corridor Line", static GTFS route_long_name is just
+# "Northeast Corridor"). Verified live on 2026-08-01 by listing every distinct
+# TRAIN_LINE value across all currently-running trains system-wide (31 trains, 10
+# lines) and matching against known Newark-area routes. NJCLL/BNTNM (local/variant
+# short codes) have no separate live-feed name -- they map to the same TRAIN_LINE as
+# their parent code, since the real-time feed doesn't distinguish local/express here.
+TRAIN_LINE_TO_CODE = {
+    "Northeast Corridor Line": "NEC",
+    "North Jersey Coast Line": "NJCL",
+    "Raritan Valley Line": "RARV",
+    "Montclair-Boonton Line": "BNTN",
+    "Morris & Essex Line": "MNE",
+    "Gladstone Branch": "MNEG",
+}

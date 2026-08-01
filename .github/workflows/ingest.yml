@@ -33,11 +33,9 @@ jobs:
 
       - name: Poll NJ Transit GTFS-RT
         working-directory: ingestion
-        # Expected to fail until NJT_USERNAME/NJT_PASSWORD are set as repo secrets
-        # AND the TODOs in njt_client.py/poll_gtfs_rt.py are resolved against the
-        # real API reference -- see /ingestion/README.md. continue-on-error keeps
-        # that (currently inevitable) failure from masking the weather step above.
-        continue-on-error: true
+        # Verified working against the real API on 2026-08-01 -- see
+        # ENGINEERING_LOG.md and njt_client.py's docstring for the confirmed
+        # request/response shapes. No longer expected to fail.
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           NJT_USERNAME: ${{ secrets.NJT_USERNAME }}
