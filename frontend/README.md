@@ -2,11 +2,10 @@
 
 Owned by `frontend-engineer-agent`. Next.js (App Router, TypeScript, Tailwind) app: the public landing page and the live dashboard.
 
-## Status (v4 landing page design, Week 3 functionality)
-- **Landing page** (`app/page.tsx`): dark/mysterious, monumental-hero register per `docs/landing-page-brief.md` (v4, 2026-08-01) — one `--ink` background throughout, one `--signal` amber accent, a crafted `HeroScene` (vignette + glow + converging rail-perspective lines) standing in for a real photo, technical marginalia, a flat top nav, a mono ledger-style pipeline list, an outlined wordmark divider. This is the fourth design pass; see `ENGINEERING_LOG.md` for the full history (v1 too restrained, v2 colorful-but-still-dev-tool, v3 illustrated-creative-agency, v4 current). Per-line identity colors (`lib/lineColors.ts`) are now dashboard-only — a multi-color palette on the landing page would violate v4's own near-monochrome rule. The landing page doesn't follow the light/dark theme toggle (fixed palette); the dashboard still does.
-- **Dashboard** (`app/dashboard/page.tsx`): line picker + live status table, polling `/lines` and `/lines/{line}/live` every 30s. Verified end-to-end against a running local backend.
-- `/lines/{line}/predict` and `/lines/{line}/scorecard` UI lands once `/backend` serves them (Week 3-4).
-- A Higgsfield AI MCP connection is declared in the repo-root `.mcp.json` (for future AI-generated illustration work) but isn't live — it needs the user's own approval/credentials.
+## Status
+- **Landing page** (`app/page.tsx`): dark/mysterious, monumental-hero register per `docs/landing-page-brief.md` (v4). `HeroScene.tsx` now renders a real, properly-licensed photo (NJ Transit ALP-46 #4655 at Newark Broad Street, CC BY-SA 3.0, credited in-frame) with a dark/desaturated CSS treatment — see the brief's "Imagery" section for the Alstom-photo copyright issue that was flagged and avoided before this one was found. One `--ink` background throughout, one `--signal` amber accent, technical marginalia, a flat top nav, a mono ledger-style pipeline list, an outlined wordmark divider. Fourth design pass overall — see `ENGINEERING_LOG.md` for the full history. Per-line identity colors (`lib/lineColors.ts`) are dashboard-only — a multi-color palette on the landing page would violate v4's own near-monochrome rule. The landing page doesn't follow the light/dark theme toggle (fixed palette); the dashboard still does.
+- **Dashboard** (`app/dashboard/page.tsx`): line picker, live status table, predicted-risk panel (prefers the v2 ML model over the v1 baseline once one exists), reliability scorecard, and service alerts — all verified against real production data.
+- A Higgsfield AI MCP connection is declared in the repo-root `.mcp.json` (for future AI-generated imagery) but isn't live — needs the user's own approval/credentials.
 
 ## Setup
 ```

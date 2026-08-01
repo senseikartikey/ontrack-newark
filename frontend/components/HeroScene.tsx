@@ -1,73 +1,57 @@
+import Image from "next/image";
+
 /**
- * Crafted stand-in for the hero's "monumental image" -- no photography is
- * generated or sourced (see docs/landing-page-brief.md, v4). This is sized,
- * positioned, and toned exactly as the real thing will be, so a real photo
- * (Kartikey's own, or AI-generated once an image tool is connected) drops in
- * later with zero layout changes -- just swap this component for an <img>/
- * background-image with the same aspect and position.
+ * The hero's monumental image -- a real photo, replacing the earlier crafted
+ * CSS/SVG placeholder now that a properly-licensed one exists (see
+ * docs/landing-page-brief.md).
  *
- * Composition: a dark vignette (evoking a platform/tunnel at night), one warm
- * signal-light glow off-center, and faint converging lines suggesting rail
- * perspective receding into the dark. Grain is layered on top via the
- * `.grain` utility on the parent section, not here.
+ * Photo: NJ Transit ALP-46 locomotive #4655 at Newark Broad Street (the
+ * station's actual clock tower is visible) -- the same station named in the
+ * hero's technical marginalia. By Lexcie, via Wikimedia Commons, licensed
+ * CC BY-SA 3.0: https://commons.wikimedia.org/wiki/File:ALP-46_NJT_4655_at_Newark_Broad_St.JPG
+ * Original is a daytime shot; darkened/desaturated/grain-processed here per
+ * the brief's "processed, never raw" rule -- this is a derivative work under
+ * the same license, credited below per its ShareAlike terms.
  */
 export default function HeroScene() {
   return (
     <div className="absolute inset-0 overflow-hidden" aria-hidden>
-      {/* base vignette */}
+      <Image
+        src="/hero-newark-broad-st.jpg"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        style={{
+          objectFit: "cover",
+          objectPosition: "center 55%",
+          filter: "grayscale(0.8) sepia(0.15) contrast(1.15) brightness(0.48)",
+        }}
+      />
+
+      {/* dark scrim so overlaid marginalia/headline stay legible */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(120% 90% at 50% 115%, #241a10 0%, #120d09 45%, #0c0a08 75%)",
+            "linear-gradient(to top, rgba(12,10,8,0.95), rgba(12,10,8,0.25) 45%, rgba(12,10,8,0.72))",
         }}
       />
-      {/* signal glow */}
-      <div
-        className="absolute rounded-full"
-        style={{
-          width: "38rem",
-          height: "38rem",
-          left: "62%",
-          top: "8%",
-          background:
-            "radial-gradient(circle, rgba(201,119,46,0.35) 0%, rgba(201,119,46,0.08) 45%, transparent 70%)",
-          filter: "blur(20px)",
-        }}
-      />
-      {/* converging rail lines */}
-      <svg
-        className="absolute inset-0 w-full h-full"
-        viewBox="0 0 1200 800"
-        preserveAspectRatio="xMidYMax slice"
-      >
-        {[-260, -140, -40, 60, 160, 280].map((offset) => (
-          <line
-            key={offset}
-            x1={600 + offset * 2.6}
-            y1="800"
-            x2="600"
-            y2="360"
-            stroke="rgba(241,236,226,0.14)"
-            strokeWidth="1.5"
-          />
-        ))}
-        <line
-          x1="0"
-          y1="620"
-          x2="1200"
-          y2="620"
-          stroke="rgba(241,236,226,0.08)"
-          strokeWidth="1"
-        />
-      </svg>
-      {/* bottom fade so overlaid text stays legible */}
       <div
         className="absolute inset-x-0 bottom-0 h-2/3"
-        style={{
-          background: "linear-gradient(to top, rgba(12,10,8,0.9), transparent)",
-        }}
+        style={{ background: "linear-gradient(to top, rgba(12,10,8,0.92), transparent)" }}
       />
+
+      {/* required CC BY-SA 3.0 attribution */}
+      <a
+        href="https://commons.wikimedia.org/wiki/File:ALP-46_NJT_4655_at_Newark_Broad_St.JPG"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute bottom-2 right-3 font-mono text-[0.625rem] hover:underline"
+        style={{ color: "rgba(241,236,226,0.4)" }}
+      >
+        Photo: Lexcie / CC BY-SA 3.0, adapted
+      </a>
     </div>
   );
 }

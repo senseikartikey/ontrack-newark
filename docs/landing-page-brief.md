@@ -9,18 +9,19 @@ References: [zajno.com](https://zajno.com/) for overall studio polish, plus a sp
 Concretely, on this page:
 - **`--ink`** (`#0c0a08`, warm near-black, never pure `#000`) is the only background across every section — no more color-block sections (no lavender/rose).
 - **`--signal`** (`#c9772e`, a warm amber) is the *one* accent — chosen because it evokes platform/signal lighting, not an arbitrary brand color. Used sparingly: step numbers, the live-status connected dot, hover states.
-- **`HeroScene.tsx`**: a crafted CSS/SVG stand-in for the monumental hero image — a dark vignette, one warm glow (a distant signal light), and faint converging lines suggesting rail perspective receding into the dark. This is **not** a final asset — see "Imagery" below.
-- **Technical marginalia** in the hero: `PLATE II — TRANSIT LEDGER`, real Newark Penn Station coordinates, `LIVE SINCE 2026-07-30` — small mono type, per the methodology's "type at extremes" rule.
+- **`HeroScene.tsx`**: the real monumental hero image, as of 2026-08-01 — see "Imagery" below for how it was sourced and processed.
+- **Technical marginalia** in the hero: `PLATE II — TRANSIT LEDGER`, Newark Broad Street's real coordinates (matching the hero photo's actual location), `LIVE SINCE 2026-07-30` — small mono type, per the methodology's "type at extremes" rule.
 - **`TopNav.tsx`**: flat, minimal — wordmark + one underlined text link. No floating pill (that was v3's device; it read as "friendly SaaS," which conflicts with this register).
 - **`PipelineDiagram.tsx`**: a mono "ledger" list (numbered rows, hairline dividers) instead of colored cards — evokes the methodology's "transaction-ID chips" device without literally copying Direction 1's palette.
 - **Wordmark divider**: outlined/ghost text (`-webkit-text-stroke`, transparent fill) rather than a solid color fill — reads as editorial/architectural rather than a bold brand moment, fitting the quieter register.
 - **Per-line identity colors** (`lib/lineColors.ts`) are now **dashboard-only**. Showing 6 categorical colors on the landing page would violate "never evenly-distributed colorful palettes" — the landing page is a marketing/brand surface and stays near-monochrome; the dashboard is a utility surface where color-as-data-encoding is legitimate and stays.
 
-### Imagery — explicitly deferred, not faked
-Per the methodology's own instruction ("do NOT generate or source any imagery... reserve the hero slot... fill it with a flat CSS stand-in... so the real image drops in with zero layout changes"): no photo was generated or sourced for this page. `HeroScene.tsx` is sized and positioned exactly where a real image will go. Two real paths forward, in order of preference:
-1. **Kartikey's own photo** of a Newark platform/train, ideally moody/dusk/night — most authentic, zero licensing concern, fits the founder-note "I ride these lines" story directly.
-2. **AI-generated**, once the Higgsfield MCP (`.mcp.json`) is actually connected and approved.
-Do not substitute a scraped/stock photo without an explicit license check — copyright risk on a public repo.
+### Imagery — real photo, properly licensed (2026-08-01)
+Kartikey initially proposed an Alstom corporate press photo (from alstom.com marketing material) as the hero image. Flagged and declined: it's Alstom's copyrighted commercial photography with no license grant, and using a manufacturer's official press photo risked implying an Alstom/NJ Transit endorsement of this project that doesn't exist. Kartikey agreed to find a properly-licensed alternative instead.
+
+Found on Wikimedia Commons: **[NJ Transit ALP-46 #4655 at Newark Broad Street](https://commons.wikimedia.org/wiki/File:ALP-46_NJT_4655_at_Newark_Broad_St.JPG)**, by Lexcie, licensed **CC BY-SA 3.0** — the actual Newark Broad Street clock tower is visible in frame, which is why the marginalia coordinates were corrected to that station (previously said Newark Penn). Original is a daytime shot; heavily desaturated, darkened, and warmed via CSS filters (`grayscale`/`sepia`/`contrast`/`brightness`) plus the page's existing grain texture to match the "processed, never raw" rule and the dark register — this counts as a derivative work, so attribution (photographer + license + link, per ShareAlike terms) is shown as a small credit in the hero's corner, not buried in a footnote. Downloaded, resized to 2400px wide and re-compressed (2.8MB → ~490KB) before committing, rather than serving the original file size.
+
+If ever revisited: Kartikey's own phone photo of these lines would still be the more authentic option, and remains open for a future swap (same component, same treatment).
 
 ## Design history
 1. **v1 (2026-07-30, restrained)**: near-monochrome, one blue accent, zero animation, terminal-box-only hero. Read as boring — conflated "avoid AI slop" with "stay minimal."

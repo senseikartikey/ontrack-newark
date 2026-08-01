@@ -28,9 +28,9 @@ export default function LandingPage() {
           >
             <div>PLATE II — TRANSIT LEDGER</div>
             <div>
-              40.7342°N <span className="marginalia-accent">·</span> 74.1645°W
+              40.7476°N <span className="marginalia-accent">·</span> 74.1719°W
             </div>
-            <div>NEWARK PENN STATION</div>
+            <div>NEWARK BROAD STREET</div>
             <div>LIVE SINCE 2026-07-30</div>
           </motion.div>
 
