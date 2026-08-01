@@ -67,3 +67,19 @@ TRAIN_LINE_TO_CODE = {
     "Morris & Essex Line": "MNE",
     "Gladstone Branch": "MNEG",
 }
+
+
+def match_line_scope(msg_line_scope: str) -> str | None:
+    """Resolve a getStationMSG MSG_LINE_SCOPE value to one of our route codes.
+
+    Verified live on 2026-08-01: real values look like "*North Jersey Coast
+    Line" (leading asterisk) and "*MontClair-Boonton Line" (inconsistent
+    internal casing vs. TRAIN_LINE_TO_CODE's "Montclair-Boonton Line") --
+    hence a case-insensitive match after stripping the asterisk, rather than
+    an exact-string dict lookup.
+    """
+    normalized = msg_line_scope.strip().lstrip("*").strip().lower()
+    for name, code in TRAIN_LINE_TO_CODE.items():
+        if name.lower() == normalized:
+            return code
+    return None

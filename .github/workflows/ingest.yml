@@ -42,3 +42,11 @@ jobs:
           NJT_PASSWORD: ${{ secrets.NJT_PASSWORD }}
         run: python poll_gtfs_rt.py
 
+      - name: Poll NJ Transit service alerts
+        working-directory: ingestion
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NJT_USERNAME: ${{ secrets.NJT_USERNAME }}
+          NJT_PASSWORD: ${{ secrets.NJT_PASSWORD }}
+        run: python poll_alerts.py
+

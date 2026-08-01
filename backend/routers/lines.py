@@ -105,3 +105,57 @@ def get_predicted_risk(line: str, db: Session = Depends(get_db)):
         "sample_size": baseline.sample_size,
         "computed_at": baseline.computed_at,
     }
+
+
+# A trip counts "on time" using the same 60s threshold the frontend's live-status
+# badge uses, so the scorecard and the live view never disagree about what
+# "on time" means.
+ON_TIME_THRESHOLD_SECONDS = 60
+
+
+def _on_time_pct(db: Session, line: str, days: int) -> dict:
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+
+    # One reading per (trip, calendar day) -- a trip polled every 5 min while
+    # sitting at the same next-stop would otherwise count many times over.
+    latest_per_trip_day = (
+        select(
+            TripUpdate.trip_id,
+            func.date(TripUpdate.scheduled_time).label("trip_date"),
+            func.max(TripUpdate.collected_at).label("latest_collected_at"),
+        )
+        .where(TripUpdate.line == line, TripUpdate.scheduled_time >= cutoff)
+        .group_by(TripUpdate.trip_id, func.date(TripUpdate.scheduled_time))
+        .subquery()
+    )
+
+    delays = db.execute(
+        select(TripUpdate.delay_seconds).join(
+            latest_per_trip_day,
+            (TripUpdate.trip_id == latest_per_trip_day.c.trip_id)
+            & (func.date(TripUpdate.scheduled_time) == latest_per_trip_day.c.trip_date)
+            & (TripUpdate.collected_at == latest_per_trip_day.c.latest_collected_at),
+        )
+    ).scalars().all()
+
+    sample_size = len(delays)
+    if sample_size == 0:
+        return {"sample_size": 0, "on_time_pct": None}
+
+    on_time = sum(1 for d in delays if d is not None and d <= ON_TIME_THRESHOLD_SECONDS)
+    return {"sample_size": sample_size, "on_time_pct": round(100 * on_time / sample_size, 1)}
+
+
+@router.get("/{line}/scorecard")
+def get_scorecard(line: str, db: Session = Depends(get_db)):
+    """Rolling 7/30-day on-time percentage. `sample_size` is always included so
+    the frontend can hedge confidence on a small sample rather than presenting
+    a percentage from a handful of trips as if it were a stable statistic."""
+    if line not in NEWARK_AREA_LINES:
+        raise HTTPException(status_code=404, detail=f"Unknown line: {line}")
+
+    return {
+        "line": line,
+        "rolling_7_day": _on_time_pct(db, line, 7),
+        "rolling_30_day": _on_time_pct(db, line, 30),
+    }

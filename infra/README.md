@@ -3,7 +3,7 @@
 Owned by `devops-engineer-agent`. Scheduled ingestion/compute workflows live in `/.github/workflows/` (GitHub Actions requires them at the repo root, not inside `/infra` itself — this file documents them).
 
 ## Workflows
-- **`ingest.yml`** — every 5 minutes: `poll_weather.py`, then `poll_gtfs_rt.py` (the latter `continue-on-error: true` since it's expected to fail until NJ Transit credentials are configured — see `/ingestion/README.md`).
+- **`ingest.yml`** — every 5 minutes: `poll_weather.py`, `poll_gtfs_rt.py`, `poll_alerts.py`. All three verified working against the real APIs as of 2026-08-01 — see `ENGINEERING_LOG.md`.
 - **`static-gtfs.yml`** — weekly: `static_gtfs_loader.py` (the static feed changes rarely).
 - **`baseline.yml`** — daily: `compute_baseline.py` (the delay distribution shifts slowly).
 

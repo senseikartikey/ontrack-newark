@@ -27,6 +27,21 @@ export type PredictedRisk =
       computed_at: string;
     };
 
+export type Alert = {
+  alert_id: string;
+  line: string | null;
+  header_text: string;
+  url: string | null;
+  active_from: string | null;
+};
+
+export type ScorecardWindow = { sample_size: number; on_time_pct: number | null };
+export type Scorecard = {
+  line: string;
+  rolling_7_day: ScorecardWindow;
+  rolling_30_day: ScorecardWindow;
+};
+
 async function apiFetch<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, { cache: "no-store" });
   if (!res.ok) {
@@ -45,4 +60,12 @@ export function getLiveStatus(lineCode: string): Promise<LiveStatus> {
 
 export function getPredictedRisk(lineCode: string): Promise<PredictedRisk> {
   return apiFetch(`/lines/${encodeURIComponent(lineCode)}/predict`);
+}
+
+export function getScorecard(lineCode: string): Promise<Scorecard> {
+  return apiFetch(`/lines/${encodeURIComponent(lineCode)}/scorecard`);
+}
+
+export function getAlerts(lineCode: string): Promise<{ alerts: Alert[] }> {
+  return apiFetch(`/alerts?line=${encodeURIComponent(lineCode)}`);
 }

@@ -3,12 +3,16 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
+  getAlerts,
   getLines,
   getLiveStatus,
   getPredictedRisk,
+  getScorecard,
+  type Alert,
   type Line,
   type LiveTrip,
   type PredictedRisk,
+  type Scorecard,
 } from "@/lib/api";
 import ThemeToggle from "@/components/ThemeToggle";
 import { colorForLine } from "@/lib/lineColors";
@@ -32,6 +36,8 @@ export default function DashboardPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [trips, setTrips] = useState<LiveTrip[] | null>(null);
   const [prediction, setPrediction] = useState<PredictedRisk | null>(null);
+  const [scorecard, setScorecard] = useState<Scorecard | null>(null);
+  const [alerts, setAlerts] = useState<Alert[] | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -82,6 +88,31 @@ export default function DashboardPage() {
     };
   }, [selected]);
 
+  useEffect(() => {
+    if (!selected) return;
+    let cancelled = false;
+
+    getScorecard(selected)
+      .then((data) => {
+        if (!cancelled) setScorecard(data);
+      })
+      .catch(() => {
+        if (!cancelled) setScorecard(null);
+      });
+
+    getAlerts(selected)
+      .then((data) => {
+        if (!cancelled) setAlerts(data.alerts);
+      })
+      .catch(() => {
+        if (!cancelled) setAlerts(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selected]);
+
   return (
     <div className="flex-1 flex flex-col">
       <header className="border-b border-[var(--border)]">
@@ -111,6 +142,8 @@ export default function DashboardPage() {
                 onClick={() => {
                   setSelected(line.code);
                   setTrips(null);
+                  setScorecard(null);
+                  setAlerts(null);
                 }}
                 className="font-mono text-xs px-3 py-1.5 rounded-full border flex items-center gap-1.5 transition-all hover:-translate-y-0.5"
                 style={{
@@ -153,6 +186,7 @@ export default function DashboardPage() {
           )}
 
           {trips !== null && trips.length > 0 && (
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-[var(--text-muted)] font-mono text-xs">
@@ -189,6 +223,7 @@ export default function DashboardPage() {
                 })}
               </tbody>
             </table>
+            </div>
           )}
         </section>
 
@@ -234,11 +269,90 @@ export default function DashboardPage() {
           )}
         </section>
 
-        <p className="mt-6 font-mono text-xs text-[var(--text-muted)]">
-          Historical scorecards land once /ml&apos;s evaluation ships (Week 4) — see
-          the project&apos;s ENGINEERING_LOG.md.
-        </p>
+        <div className="mt-6 grid md:grid-cols-2 gap-6">
+          <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
+            <div className="px-5 py-3 border-b border-[var(--border)]">
+              <h2 className="font-display font-semibold">Reliability scorecard</h2>
+            </div>
+
+            {scorecard === null && (
+              <p className="px-5 py-8 text-[var(--text-secondary)] font-mono text-sm">
+                loading…
+              </p>
+            )}
+
+            {scorecard && (
+              <div className="px-5 py-5 flex gap-8">
+                <ScorecardStat label="Last 7 days" window={scorecard.rolling_7_day} />
+                <ScorecardStat label="Last 30 days" window={scorecard.rolling_30_day} />
+              </div>
+            )}
+          </section>
+
+          <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
+            <div className="px-5 py-3 border-b border-[var(--border)]">
+              <h2 className="font-display font-semibold">Service alerts</h2>
+            </div>
+
+            {alerts === null && (
+              <p className="px-5 py-8 text-[var(--text-secondary)] font-mono text-sm">
+                loading…
+              </p>
+            )}
+
+            {alerts !== null && alerts.length === 0 && (
+              <p className="px-5 py-8 text-[var(--text-secondary)] text-sm">
+                No active alerts for this line right now.
+              </p>
+            )}
+
+            {alerts !== null && alerts.length > 0 && (
+              <ul className="divide-y divide-[var(--border)] max-h-72 overflow-y-auto">
+                {alerts.map((alert) => (
+                  <li key={alert.alert_id} className="px-5 py-3 text-sm text-[var(--text-secondary)]">
+                    {alert.url ? (
+                      <a
+                        href={alert.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-[var(--text-primary)] transition-colors"
+                      >
+                        {alert.header_text}
+                      </a>
+                    ) : (
+                      alert.header_text
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
       </main>
+    </div>
+  );
+}
+
+function ScorecardStat({
+  label,
+  window,
+}: {
+  label: string;
+  window: { sample_size: number; on_time_pct: number | null };
+}) {
+  return (
+    <div>
+      <p className="font-mono text-xs text-[var(--text-muted)] mb-1">{label}</p>
+      {window.on_time_pct === null ? (
+        <p className="text-[var(--text-secondary)] text-sm">no data yet</p>
+      ) : (
+        <>
+          <p className="text-2xl font-display font-bold">{window.on_time_pct}%</p>
+          <p className="font-mono text-xs text-[var(--text-muted)]">
+            on time · {window.sample_size} trip{window.sample_size === 1 ? "" : "s"}
+          </p>
+        </>
+      )}
     </div>
   );
 }

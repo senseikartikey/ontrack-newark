@@ -2,14 +2,15 @@
 
 Owned by `backend-engineer-agent`. FastAPI app serving live status, predictions, and scorecards, reading from Postgres (populated by `/ingestion`) and precomputed predictions (populated by `/ml`).
 
-## Status (Week 3)
+## Status (Week 5) — full endpoint set built and verified against real data
 - `GET /health` — liveness check.
 - `GET /lines` — list of in-scope Newark-area lines.
 - `GET /lines/{line}/live` — most recent trip_updates reading per trip, within a 30-minute window.
-- `GET /lines/{line}/predict` — v1 statistical baseline lookup for the current hour/day-of-week. Returns `{"status": "insufficient_data", ...}` honestly rather than a fabricated number when `/ml` hasn't computed a trustworthy bucket yet (true for every line right now, since ingestion has no real delay history).
-- `/lines/{line}/scorecard` lands in Week 4.
+- `GET /lines/{line}/predict` — v1 statistical baseline lookup for the current hour/day-of-week. Returns `{"status": "insufficient_data", ...}` honestly rather than a fabricated number when `/ml` hasn't computed a trustworthy bucket yet.
+- `GET /lines/{line}/scorecard` — rolling 7/30-day on-time %, deduplicated to one reading per (trip, calendar day) so a trip re-polled every 5 minutes doesn't get counted repeatedly. Always includes `sample_size` so the frontend can hedge on a small sample.
+- `GET /alerts?line=` — active service alerts, optionally filtered by line.
 
-Smoke-tested against a throwaway SQLite DB — including seeding a real `delay_baseline` row to confirm the `/predict` "has data" path, not just the empty-data path — all endpoints return correctly, including the 404 on an unknown line.
+Verified against real production data (not just a throwaway test DB): all five endpoints tested live after NJ Transit RailData access was approved 2026-08-01 — see `ENGINEERING_LOG.md`.
 
 ## Setup
 ```

@@ -6,6 +6,7 @@ Owned by `data-engineer-agent`. Collects NJ Transit rail delay data and Newark-a
 - **Weather (`weather_client.py`, `poll_weather.py`)**: working, verified live against `api.weather.gov`. No API key needed.
 - **Static GTFS (`static_gtfs_loader.py`)**: working, verified live against NJ Transit's public `rail_data.zip` (no auth required). Loads `routes`/`stops` reference tables.
 - **NJ Transit RailData / GTFS-RT (`njt_client.py`, `poll_gtfs_rt.py`)**: working, verified live 2026-08-01 against the real API (RailData access approved). Real train delay data is flowing into `trip_updates` for all 6 distinct Newark-area lines (NEC, NJCL, RARV, BNTN, MNE, MNEG). See `njt_client.py`'s docstring for the confirmed request/response shapes, and `config.py`'s `TRAIN_LINE_TO_CODE` for how the live feed's full line names (e.g. `"Northeast Corridor Line"`) map to our route codes.
+- **Service alerts (`poll_alerts.py`)**: working, verified live 2026-08-01 against the real `getStationMSG` endpoint. Real alerts (cancellations, delays) flow into `service_alerts`, filtered to Newark-area lines via `config.match_line_scope` (handles the feed's inconsistent `MSG_LINE_SCOPE` casing/formatting, e.g. `"*MontClair-Boonton Line"`).
 
 ## Setup
 ```
@@ -22,8 +23,9 @@ Note (Windows): `zoneinfo` needs the `tzdata` package on Windows since it doesn'
 python poll_weather.py
 python static_gtfs_loader.py
 python poll_gtfs_rt.py
+python poll_alerts.py
 ```
-All three work end-to-end today.
+All four work end-to-end today.
 
 ## Known limitation
 `NEXT_STOP` in the live vehicle-data feed is a human-readable station name (e.g. `"Ridgewood"`), not the numeric `stop_id` static GTFS uses (e.g. `"107"`) — the two ID systems don't share a key, and there's no name-matching layer built yet. We store the station name as-is in the `stop_id` column; it's more immediately readable than an opaque ID would be, but it means `trip_updates.stop_id` isn't currently joinable against `stops.stop_id`. Worth revisiting if a feature needs that join (e.g. a map view).

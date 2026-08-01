@@ -13,6 +13,11 @@ source (github.com/jtarrio/raildata/api/{api,methods}.go), not just its README:
   object) of train objects with fields ID, TRAIN_LINE, DIRECTION,
   ICS_TRACK_CKT, LAST_MODIFIED, SCHED_DEP_TIME, SEC_LATE, NEXT_STOP,
   LONGITUDE, LATITUDE.
+- getStationMSG: request {token} -> response is a BARE JSON array of alert
+  objects with fields MSG_TYPE, MSG_TEXT, MSG_RICHTEXT, MSG_PUBDATE, MSG_ID,
+  MSG_AGENCY, MSG_SOURCE, MSG_STATION_SCOPE, MSG_LINE_SCOPE (e.g.
+  "*North Jersey Coast Line" -- note the leading asterisk and inconsistent
+  casing like "MontClair-Boonton Line"), MSG_PUBDATE_UTC, MSG_URL.
 """
 from __future__ import annotations
 
@@ -88,6 +93,18 @@ class NJTransitRailClient:
         token = self._ensure_token()
         resp = self._session.post(
             f"{self._base_url}/getVehicleData",
+            files=_multipart({"token": token}),
+            timeout=15,
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+    def get_station_messages(self) -> list[dict]:
+        """Fetch active system-wide service alerts/messages. Returns a bare list
+        of alert dicts (see module docstring for fields) -- not wrapped."""
+        token = self._ensure_token()
+        resp = self._session.post(
+            f"{self._base_url}/getStationMSG",
             files=_multipart({"token": token}),
             timeout=15,
         )

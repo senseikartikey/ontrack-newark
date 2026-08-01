@@ -53,8 +53,10 @@ Running history of what was built and what broke: see [`ENGINEERING_LOG.md`](ENG
 
 ## Current status
 
-**Fully live, no remaining manual blockers.** Repo: [github.com/senseikartikey/ontrack-newark](https://github.com/senseikartikey/ontrack-newark) (public). Supabase Postgres connected (pooler endpoint). NJ Transit RailData access was approved 2026-08-01 — real GTFS-RT delay data is now flowing into production for all 6 Newark-area lines, alongside weather and static GTFS, all confirmed via GitHub Actions run IDs (`Ingest live data` every 5 min, `Refresh static GTFS` weekly, `Recompute delay baseline` daily). Backend (`/lines`, `/live`, `/predict`) and the frontend (landing page v4 + dashboard with predicted-risk panel) are built and verified against this real database.
+**Week 5 done, full endpoint set live.** Repo: [github.com/senseikartikey/ontrack-newark](https://github.com/senseikartikey/ontrack-newark) (public). Supabase Postgres connected (pooler endpoint). NJ Transit RailData access approved 2026-08-01 — real GTFS-RT delay data, service alerts, weather, and static GTFS are all flowing into production on schedule via GitHub Actions (`Ingest live data` every 5 min, `Refresh static GTFS` weekly, `Recompute delay baseline` daily). Backend now serves the full planned endpoint set (`/lines`, `/live`, `/predict`, `/scorecard`, `/alerts`); frontend (landing page v4 + dashboard with predicted-risk, scorecard, and alerts panels) verified against real data. Root `README.md` has a real architecture diagram; `docs/demo-script.md` exists for conference use.
 
-**What's next**: `/ml`'s baseline needs real accumulated history (days/weeks) before any bucket clears `MIN_SAMPLES_THRESHOLD` — that's a waiting-for-data problem now, not a blocked-on-access problem. Once enough real data exists, train the v2 LightGBM model per the plan's Week 4.
+**What's next**:
+- `/ml`'s baseline needs real accumulated history (days/weeks) before any bucket clears `MIN_SAMPLES_THRESHOLD` — waiting for data now, not blocked on access. Once enough exists, train the v2 LightGBM model per the plan's Week 4.
+- No public hosted URL yet — backend/frontend deployment (Render/Railway + Vercel) was never actually done despite being in the original plan; still local-only. See root `README.md`'s "What's next."
 
 See `ENGINEERING_LOG.md` for full details and the plan file for the 4-6 week build sequence.
