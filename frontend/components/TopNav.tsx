@@ -18,13 +18,36 @@ export default function TopNav() {
         >
           ONTRACK
         </span>
-        <Link
-          href="/dashboard"
-          className="font-mono text-xs tracking-[0.15em] pb-1 border-b"
-          style={{ color: "var(--paper)", borderColor: "var(--paper)" }}
-        >
-          VIEW DASHBOARD
-        </Link>
+        <div className="flex items-center gap-6">
+          <Link
+            href="/board"
+            className="font-mono text-xs tracking-[0.15em]"
+            style={{ color: "var(--paper-dim)" }}
+          >
+            LIVE BOARD
+          </Link>
+          <Link
+            href="/hub"
+            className="font-mono text-xs tracking-[0.15em]"
+            style={{ color: "var(--paper-dim)" }}
+          >
+            TRANSFERS
+          </Link>
+          <Link
+            href="/ny-penn"
+            className="font-mono text-xs tracking-[0.15em]"
+            style={{ color: "var(--paper-dim)" }}
+          >
+            NY PENN TRACKS
+          </Link>
+          <Link
+            href="/dashboard"
+            className="font-mono text-xs tracking-[0.15em] pb-1 border-b"
+            style={{ color: "var(--paper)", borderColor: "var(--paper)" }}
+          >
+            VIEW DASHBOARD
+          </Link>
+        </div>
       </div>
     </motion.header>
   );

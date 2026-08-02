@@ -42,9 +42,9 @@ export default function LandingPage() {
               className="type-monumental text-5xl md:text-7xl max-w-2xl"
               style={{ color: "var(--paper)" }}
             >
-              Your train is late.
+              Know what&apos;s coming
               <br />
-              You already knew that.
+              before NJ Transit tells you.
             </motion.h1>
 
             <motion.p
@@ -54,9 +54,11 @@ export default function LandingPage() {
               className="mt-6 max-w-md text-base leading-relaxed"
               style={{ color: "var(--paper-dim)" }}
             >
-              NJ Transit tells you a train is delayed after you&apos;re already
-              standing on the platform. OnTrack Newark predicts delay risk on
-              Newark-area rail lines before you leave the house.
+              NJ Transit&apos;s app buries its own live board, skips transfers,
+              and only tells you a train is late once you&apos;re already on
+              the platform. OnTrack does all three — plus delay-risk
+              prediction that gets smarter with real data — for every rail
+              line in the state.
             </motion.p>
 
             <motion.div
@@ -85,7 +87,7 @@ export default function LandingPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.5 }}
-              className="mt-10 max-w-sm"
+              className="mt-10 max-w-md"
             >
               <HeroLiveStat />
             </motion.div>
@@ -93,7 +95,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* The problem */}
+      {/* The problem, stated as concrete before/after pairs -- not a vague
+          "every rider has a story" claim. Each pair maps directly to a real
+          shipped page, so a first-time visitor knows what "Transfers" or
+          "Live board" in the nav actually means before they ever click it. */}
       <motion.section
         initial="hidden"
         whileInView="show"
@@ -104,16 +109,49 @@ export default function LandingPage() {
         style={{ borderColor: "var(--hairline)" }}
       >
         <div className="max-w-6xl mx-auto px-6 md:px-10 py-20 md:py-28">
-          <p className="marginalia mb-6">§ 01 — THE PROBLEM</p>
-          <p
-            className="type-monumental text-2xl md:text-4xl max-w-3xl"
-            style={{ color: "var(--paper)" }}
-          >
-            Every Newark commuter has a story about a delay that had no
-            warning. NJ Transit&apos;s own real-time feed already knows a
-            train is running behind — it just doesn&apos;t tell you what
-            tomorrow&apos;s 8:14 is likely to do.
-          </p>
+          <p className="marginalia mb-10">§ 01 — WHAT NJ TRANSIT&apos;S APP GETS WRONG</p>
+
+          <div className="grid md:grid-cols-2 gap-x-12 gap-y-10 max-w-4xl">
+            {[
+              {
+                gap: "Buries its own live departure board behind extra taps.",
+                fix: "Every line, every station, one board — the way a physical sign works.",
+                href: "/board",
+              },
+              {
+                gap: "Doesn't show transfers up front anymore.",
+                fix: "Search any two stations statewide, see what connects and when.",
+                href: "/hub",
+              },
+              {
+                gap: "Tells you a train is late only after you're on the platform.",
+                fix: "Predicts delay risk before you leave, from real accumulated data — and gets more accurate as an ML model takes over from the statistical baseline.",
+                href: "/dashboard",
+              },
+              {
+                gap: "Riders don't trust its live data — trains vanish from tracking, timestamps go stale.",
+                fix: "Flags it honestly when the underlying feed itself looks unreliable, instead of pretending it's fine.",
+                href: "/dashboard",
+              },
+            ].map((item) => (
+              <a key={item.gap} href={item.href} className="block group">
+                <p
+                  className="text-sm leading-relaxed"
+                  style={{ color: "var(--paper-dim)" }}
+                >
+                  <span style={{ color: "var(--status-critical)" }}>NJ Transit: </span>
+                  {item.gap}
+                </p>
+                <p
+                  className="mt-2 text-base leading-relaxed font-medium group-hover:underline"
+                  style={{ color: "var(--paper)" }}
+                >
+                  <span style={{ color: "var(--signal)" }}>OnTrack: </span>
+                  {item.fix}
+                </p>
+              </a>
+            ))}
+          </div>
         </div>
       </motion.section>
 
@@ -137,7 +175,7 @@ export default function LandingPage() {
               {
                 n: "03",
                 title: "Display",
-                body: "Live status and predicted risk, per line, refreshed continuously.",
+                body: "Live status, predicted risk, station boards, and transfers — for any line, refreshed continuously.",
               },
             ].map((step, i) => (
               <motion.div
@@ -207,12 +245,17 @@ export default function LandingPage() {
           >
             <p style={{ color: "var(--paper-dim)" }}>$ cat founder_note.txt</p>
             <p className="mt-3" style={{ color: "var(--paper)" }}>
-              I&apos;m an AI data analyst and international student living in
-              Newark. I ride these lines. NJ Transit&apos;s data is public and
-              genuinely good — nobody had built the forward-looking layer on
-              top of it yet, so I did. This is an active build: the ingestion
-              pipeline is live, the prediction model ships once enough real
-              delay history has accumulated. Follow the build in the{" "}
+              I&apos;m an AI data analyst and I ride these lines. No single
+              app — not NJ Transit&apos;s, not any third-party one — combines
+              a real live board, transfers, and delay prediction in one
+              place, and none of them get smarter over time. NJ Transit&apos;s
+              data is public and genuinely good, so I built the layer on top
+              of it that actually solves the pain points riders complain
+              about, statewide. This is an active build: the ingestion
+              pipeline is live, the ML prediction model ships once enough
+              real delay history has accumulated — until then, a statistical
+              baseline holds the spot, honestly labeled as such. Follow the
+              build in the{" "}
               <a
                 href="https://github.com/senseikartikey/ontrack-newark"
                 className="underline"

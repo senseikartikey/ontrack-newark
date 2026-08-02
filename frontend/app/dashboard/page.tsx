@@ -15,6 +15,7 @@ import {
   type Scorecard,
 } from "@/lib/api";
 import ThemeToggle from "@/components/ThemeToggle";
+import DataConfidenceIndicator from "@/components/DataConfidenceIndicator";
 import { colorForLine } from "@/lib/lineColors";
 
 function formatDelay(seconds: number | null) {
@@ -117,18 +118,51 @@ export default function DashboardPage() {
     <div className="flex-1 flex flex-col">
       <header className="border-b border-[var(--border)]">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="font-display font-bold text-lg tracking-tight">
-            OnTrack Newark
-          </Link>
+          <div className="flex items-center gap-6">
+            <Link href="/" className="font-display font-bold text-lg tracking-tight">
+              OnTrack
+            </Link>
+            <nav className="flex items-center gap-4 font-mono text-xs">
+              <span className="text-[var(--text-primary)] border-b border-[var(--accent)] pb-0.5">
+                Line dashboard
+              </span>
+              <Link
+                href="/board"
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                Live board
+              </Link>
+              <Link
+                href="/hub"
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                Transfers
+              </Link>
+              <Link
+                href="/ny-penn"
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                NY Penn tracks
+              </Link>
+            </nav>
+          </div>
           <ThemeToggle />
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-10 w-full flex-1">
+        <div className="mb-8">
+          <h1 className="font-display font-bold text-2xl tracking-tight">Delay risk &amp; reliability</h1>
+          <p className="text-[var(--text-secondary)] text-sm mt-1 max-w-xl">
+            Pick a line to see what&apos;s running right now, how likely it is
+            to run late (predicted before it happens, not just reported after),
+            its on-time track record, and any active service alerts.
+          </p>
+        </div>
+
         {error && (
           <p className="font-mono text-sm text-[var(--status-warning)] mb-6">
-            Can&apos;t reach the API right now. Set NEXT_PUBLIC_API_BASE_URL and make
-            sure the backend is running (see /backend/README.md).
+            We can&apos;t reach live data right now. Please check back in a moment.
           </p>
         )}
 
@@ -163,11 +197,17 @@ export default function DashboardPage() {
         </div>
 
         <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
-          <div className="px-5 py-3 border-b border-[var(--border)] flex items-center justify-between">
+          <div className="px-5 py-3 border-b border-[var(--border)] flex items-start justify-between flex-wrap gap-2">
             <h2 className="font-display font-semibold">Live status</h2>
-            <span className="font-mono text-xs text-[var(--text-muted)]">
-              last 30 min · refreshes every 30s
-            </span>
+            <div className="flex items-center gap-3">
+              {/* Secondary trust signal (PRD-v2 Phase 1 data-confidence
+                  indicator): honestly flags when NJ Transit's own feed looks
+                  unreliable, without dominating the primary live-status panel. */}
+              {selected && <DataConfidenceIndicator key={selected} lineCode={selected} />}
+              <span className="font-mono text-xs text-[var(--text-muted)]">
+                last 30 min · refreshes every 30s
+              </span>
+            </div>
           </div>
 
           {trips === null && !error && (
@@ -178,10 +218,8 @@ export default function DashboardPage() {
 
           {trips !== null && trips.length === 0 && (
             <p className="px-5 py-8 text-[var(--text-secondary)] text-sm max-w-md">
-              No active trips reported in the last 30 minutes. Either it&apos;s a quiet
-              window, or live ingestion hasn&apos;t started yet — see{" "}
-              <code className="font-mono text-xs">/ingestion/README.md</code> for setup
-              status.
+              No trains currently reporting on this line. This usually just means a
+              quiet window between departures — check back in a few minutes.
             </p>
           )}
 
@@ -195,6 +233,7 @@ export default function DashboardPage() {
                   <th className="px-5 py-2 font-normal">Stop</th>
                   <th className="px-5 py-2 font-normal">Scheduled</th>
                   <th className="px-5 py-2 font-normal">Status</th>
+                  <th className="px-5 py-2 font-normal"></th>
                 </tr>
               </thead>
               <tbody>
@@ -218,6 +257,14 @@ export default function DashboardPage() {
                       <td className="px-5 py-2 font-mono" style={{ color: delay.color }}>
                         {delay.text}
                       </td>
+                      <td className="px-5 py-2 text-right">
+                        <Link
+                          href={`/trips/${encodeURIComponent(trip.trip_id)}`}
+                          className="font-mono text-xs text-[var(--accent)] hover:underline whitespace-nowrap"
+                        >
+                          on this train →
+                        </Link>
+                      </td>
                     </tr>
                   );
                 })}
@@ -230,9 +277,7 @@ export default function DashboardPage() {
         <section className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
           <div className="px-5 py-3 border-b border-[var(--border)] flex items-center justify-between">
             <h2 className="font-display font-semibold">Predicted delay risk</h2>
-            <span className="font-mono text-xs text-[var(--text-muted)]">
-              current hour · v1 statistical baseline
-            </span>
+            <span className="font-mono text-xs text-[var(--text-muted)]">current hour</span>
           </div>
 
           {prediction === null && (
@@ -243,9 +288,8 @@ export default function DashboardPage() {
 
           {prediction?.status === "insufficient_data" && (
             <p className="px-5 py-8 text-[var(--text-secondary)] text-sm max-w-md">
-              Not enough historical data yet for this line at this hour/day. This
-              baseline needs real accumulated delay history from `/ingestion` before
-              it can predict anything — see <code className="font-mono text-xs">/ml/README.md</code>.
+              Not enough delay history yet for this line at this hour to make a
+              prediction. Check back once more trains have run.
             </p>
           )}
 
@@ -264,8 +308,19 @@ export default function DashboardPage() {
                 Historically ~{Math.round(prediction.predicted_delay_seconds / 60)} min
                 delay for this line around this time, based on {prediction.sample_size}{" "}
                 observed trips.{" "}
-                <span className="font-mono text-xs text-[var(--text-muted)]">
-                  ({prediction.source === "ml_model" ? "v2 model" : "v1 statistical baseline"})
+                {/* Subtle, non-primary affordance -- the model-version distinction
+                    (v1 statistical baseline vs. v2 ML model) is real and documented,
+                    but a rider doesn't need it forced on them as visible label text;
+                    it's still available on hover for anyone curious. */}
+                <span
+                  className="font-mono text-xs text-[var(--text-muted)] cursor-help underline decoration-dotted underline-offset-2"
+                  title={
+                    prediction.source === "ml_model"
+                      ? "Calculated by OnTrack's v2 machine-learning model, trained on observed delay history."
+                      : "Calculated by OnTrack's v1 statistical baseline (typical delay for this line/hour), used until enough data exists to train the full model."
+                  }
+                >
+                  how is this calculated?
                 </span>
               </span>
             </div>

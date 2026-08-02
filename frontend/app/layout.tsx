@@ -19,9 +19,9 @@ const bricolage = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
-  title: "OnTrack Newark — NJ Transit reliability, predicted before it's official",
+  title: "OnTrack — live status and predicted delay risk for every NJ Transit rail line",
   description:
-    "Live delay data and predicted delay risk for NJ Transit rail lines serving Newark, built on public GTFS data.",
+    "Live status, predicted delay risk, station boards, and transfers for every NJ Transit rail line, built on public GTFS data.",
 };
 
 export default function RootLayout({
