@@ -22,6 +22,7 @@ from config import TRAIN_LINE_TO_CODE
 from db import get_session, init_db
 from models import TripUpdate
 from njt_client import NJTransitRailClient
+from reconcile_anomalies import reconcile as reconcile_anomalies
 
 # NJT's timestamps are US Eastern local time, formatted like "31-Jul-2026 10:42:45 PM".
 _NJT_TZ = ZoneInfo("America/New_York")
@@ -94,6 +95,12 @@ def run() -> int:
     rows_written = 0
 
     with get_session() as session:
+        # Reconcile against DB state from prior polls *before* writing this
+        # poll's own rows, so "the previous poll" in the comparison means the
+        # actual previous poll, not the one about to be inserted below. See
+        # reconcile_anomalies.py's module docstring for the detection logic.
+        anomaly_summary = reconcile_anomalies(session, updates, now)
+
         for u in updates:
             if not u["trip_id"] or not u["stop_id"]:
                 continue
@@ -114,6 +121,11 @@ def run() -> int:
             rows_written += 1
 
     print(f"[poll_gtfs_rt] wrote {rows_written} trip update rows (of {len(trains)} total trains system-wide)")
+    print(
+        f"[poll_gtfs_rt] anomaly reconciliation: "
+        f"{anomaly_summary['vanished_mid_route']} vanished_mid_route, "
+        f"{anomaly_summary['stale_timestamp']} stale_timestamp"
+    )
     return rows_written
 
 
