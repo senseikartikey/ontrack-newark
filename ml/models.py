@@ -82,6 +82,56 @@ class DelayBaseline(Base):
     computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class TrackAssignment(Base):
+    """Read-side mirror of /ingestion/models.py's TrackAssignment -- used as the
+    history source by compute_track_predictions.py. See that table's docstring
+    (ingestion/models.py) for the full station-identifier-space context and why
+    `track` being NULL means "unknown," not "no track."""
+
+    __tablename__ = "track_assignments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    station_code: Mapped[str] = mapped_column(String)
+    station_name: Mapped[str] = mapped_column(String, nullable=True)
+    train_id: Mapped[str] = mapped_column(String)
+    line: Mapped[str] = mapped_column(String, nullable=True)
+    destination: Mapped[str] = mapped_column(String, nullable=True)
+    track: Mapped[str] = mapped_column(String, nullable=True)
+    scheduled_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class TrackPrediction(Base):
+    """
+    Precomputed track prediction for a specific train_id at New York Penn Station,
+    written by compute_track_predictions.py -- one row per train_id (not per
+    station/train pair, since the only station covered is "NY" right now, but
+    station_code is stored for clarity/future extension to other Amtrak-dispatched
+    stations that share this same "official data has no early track visibility"
+    problem).
+
+    Methodology mirrors Clever Commute's own published approach (grouping by exact
+    train number, not just line/time-of-day, and reporting occurrence count +
+    historical share as an honest confidence signal rather than a guarantee) --
+    see compute_track_predictions.py's module docstring for the full writeup and
+    the confidence-tier thresholds in config.py.
+
+    Only written when sample_size clears TRACK_MIN_SAMPLES_LOW (3) -- below that,
+    no row is written at all, same honesty convention as DelayBaseline/MLPrediction
+    skipping rather than fabricating a low-confidence guess from almost no data.
+    """
+
+    __tablename__ = "track_predictions"
+
+    train_id: Mapped[str] = mapped_column(String, primary_key=True)
+    station_code: Mapped[str] = mapped_column(String)
+    predicted_track: Mapped[str] = mapped_column(String)
+    confidence: Mapped[str] = mapped_column(String)  # "high" | "medium" | "low"
+    sample_size: Mapped[int] = mapped_column(Integer)
+    top_track_share: Mapped[float] = mapped_column(Float)
+    computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class MLPrediction(Base):
     """
     v2 model predictions, precomputed per (line, hour_of_day, day_of_week) bucket --
