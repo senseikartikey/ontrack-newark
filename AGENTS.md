@@ -20,8 +20,8 @@ Agent definitions live in `.claude/agents/*.md`.
 
 ### `backend-engineer-agent`
 **Owns**: `/backend`.
-**Responsibility**: FastAPI app — routers, prediction-serving endpoints, response caching. Reads from Postgres and from precomputed ML outputs; never talks to external APIs directly (that's ingestion's job).
-**Invoke when**: adding/changing an API endpoint or backend business logic.
+**Responsibility**: FastAPI app — routers, prediction-serving endpoints, response caching. Reads from Postgres and from precomputed ML outputs; never talks to external APIs directly (that's ingestion's job). **As of the v2 scope expansion** (see `docs/PRD-v2.md`), this also covers Supabase Auth verification, the `/me/preferences` and `/me/saved-commutes` routers, and the scheduled notification-dispatch job (Phase 2+) — kept here rather than spun out to a new agent, same pattern as `/ml`'s daily batch job living alongside its API-serving code.
+**Invoke when**: adding/changing an API endpoint, backend business logic, auth, or notification dispatch.
 
 ### `ml-engineer-agent`
 **Owns**: `/ml`.
@@ -30,7 +30,7 @@ Agent definitions live in `.claude/agents/*.md`.
 
 ### `frontend-engineer-agent`
 **Owns**: `/frontend`.
-**Responsibility**: the Next.js dashboard *and* the public landing page. Landing page must meet the design brief in the plan (no AI-slop clichés — see `docs/landing-page-brief.md`). Uses the `dataviz` and `artifact-design` skills for chart/visual quality.
+**Responsibility**: the Next.js dashboard *and* the public landing page. Landing page must meet the design brief in the plan (no AI-slop clichés — see `docs/landing-page-brief.md`). Uses the `dataviz` and `artifact-design` skills for chart/visual quality. **As of the v2 scope expansion** (see `docs/PRD-v2.md`), this also covers the DepartureVision-style board, the on-train companion view, the transfer-aware Newark hub view, the data-confidence indicator, and (Phase 2+) auth UI and saved-commutes/notification-settings screens.
 **Invoke when**: any UI work, including the landing page.
 
 ### `devops-engineer-agent`

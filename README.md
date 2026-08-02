@@ -77,3 +77,7 @@ Each layer has its own README with exact setup steps:
 ## What's next
 - Deploy the backend (Render/Railway) and frontend (Vercel) to get a public URL, rather than local-only.
 - Once 2-3+ weeks of real delay data has accumulated, train the v2 LightGBM model and compare against the statistical baseline.
+
+## Roadmap: beyond delay tracking
+
+Research into rider complaints about NJ Transit's own app (buried live-board view, no upfront transfer info, no targeted alerts, low trust in real-time data) reframed where this project goes next: a rider-first companion for the Newark hub, not just a delay-prediction demo. Full plan, cited research, and a phased build sequence in [`docs/PRD-v2.md`](docs/PRD-v2.md). First up (Phase 1, no accounts needed): a DepartureVision-style live board, an on-train "next stops" companion view, a transfer-aware Newark hub view, proactive weather-aware commute advisories, and a data-confidence indicator that flags when NJ Transit's own feed looks unreliable.
