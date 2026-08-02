@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from config import (
     LINE_DISPLAY_NAMES,
-    NEWARK_AREA_LINES,
+    RAIL_LINES,
     RISK_LOW_MAX_SECONDS,
     RISK_MEDIUM_MAX_SECONDS,
 )
@@ -23,14 +23,14 @@ def list_lines():
     return {
         "lines": [
             {"code": code, "display_name": LINE_DISPLAY_NAMES.get(code, code)}
-            for code in NEWARK_AREA_LINES
+            for code in RAIL_LINES
         ]
     }
 
 
 @router.get("/{line}/live")
 def get_live_status(line: str, db: Session = Depends(get_db)):
-    if line not in NEWARK_AREA_LINES:
+    if line not in RAIL_LINES:
         raise HTTPException(status_code=404, detail=f"Unknown line: {line}")
 
     cutoff = datetime.now(timezone.utc) - timedelta(minutes=LIVE_WINDOW_MINUTES)
@@ -75,20 +75,23 @@ def _risk_level(avg_delay_seconds: float) -> str:
     return "high"
 
 
-@router.get("/{line}/predict")
-def get_predicted_risk(line: str, db: Session = Depends(get_db)):
+def get_current_risk(line: str, db: Session, now: datetime | None = None) -> dict:
     """
+    Shared "what's the current predicted risk for this line" helper -- used by both
+    GET /lines/{line}/predict and GET /lines/{line}/advisory (advisories.py) so the
+    preference order lives in exactly one place.
+
     Prefers the v2 LightGBM model (ml_predictions) if train_model.py has written
     a bucket for this line/hour/day-of-week -- it's only ever written once the
     model both cleared a minimum training-data threshold and beat the v1
     statistical baseline on a held-out test set, so "it exists" already implies
     "it's trustworthy enough to prefer." Falls back to the v1 baseline, then to
     an honest "insufficient_data" status rather than fabricating a number.
-    """
-    if line not in NEWARK_AREA_LINES:
-        raise HTTPException(status_code=404, detail=f"Unknown line: {line}")
 
-    now = datetime.now(timezone.utc)
+    Does not validate `line` against RAIL_LINES -- callers are expected to
+    do that themselves (they each need to raise their own HTTPException anyway).
+    """
+    now = now or datetime.now(timezone.utc)
 
     ml_prediction = db.get(MLPrediction, (line, now.hour, now.weekday()))
     if ml_prediction is not None:
@@ -122,6 +125,16 @@ def get_predicted_risk(line: str, db: Session = Depends(get_db)):
         "sample_size": baseline.sample_size,
         "computed_at": baseline.computed_at,
     }
+
+
+@router.get("/{line}/predict")
+def get_predicted_risk(line: str, db: Session = Depends(get_db)):
+    """Thin wrapper around get_current_risk() -- see that function's docstring for
+    the ml_model/statistical_baseline/insufficient_data preference order."""
+    if line not in RAIL_LINES:
+        raise HTTPException(status_code=404, detail=f"Unknown line: {line}")
+
+    return get_current_risk(line, db)
 
 
 # A trip counts "on time" using the same 60s threshold the frontend's live-status
@@ -168,7 +181,7 @@ def get_scorecard(line: str, db: Session = Depends(get_db)):
     """Rolling 7/30-day on-time percentage. `sample_size` is always included so
     the frontend can hedge confidence on a small sample rather than presenting
     a percentage from a handful of trips as if it were a stable statistic."""
-    if line not in NEWARK_AREA_LINES:
+    if line not in RAIL_LINES:
         raise HTTPException(status_code=404, detail=f"Unknown line: {line}")
 
     return {
