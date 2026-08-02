@@ -3,9 +3,12 @@
 Owned by `devops-engineer-agent`. Scheduled ingestion/compute workflows live in `/.github/workflows/` (GitHub Actions requires them at the repo root, not inside `/infra` itself — this file documents them).
 
 ## Workflows
-- **`ingest.yml`** — every 5 minutes: `poll_weather.py`, `poll_gtfs_rt.py`, `poll_alerts.py`. All three verified working against the real APIs as of 2026-08-01 — see `ENGINEERING_LOG.md`.
+- **`ingest.yml`** — every 5 minutes: `poll_weather.py`, `poll_gtfs_rt.py`, `poll_alerts.py`, `poll_track_assignments.py`. The first three verified working against the real APIs as of 2026-08-01; `poll_track_assignments.py` added 2026-08-02, verified against the real NJT RailData `getTrainSchedule` endpoint — see `ENGINEERING_LOG.md`. All four share the same NJT-authenticated (or weather-only) credentials and quota, see the note below.
 - **`static-gtfs.yml`** — weekly: `static_gtfs_loader.py` (the static feed changes rarely).
-- **`baseline.yml`** — daily: `compute_baseline.py` (the delay distribution shifts slowly).
+- **`baseline.yml`** — daily: `compute_baseline.py`, `train_model.py` (skips itself if there isn't enough data yet), `compute_track_predictions.py` (added 2026-08-02 — recomputes NY Penn track-prediction confidence from `track_assignments` history; the delay distribution and track-usage patterns both shift slowly, so daily is plenty for all three).
+
+## NJT auth quota
+`poll_gtfs_rt.py`, `poll_alerts.py`, and `poll_track_assignments.py` all authenticate against NJT RailData with the same `NJT_USERNAME`/`NJT_PASSWORD` secrets. NJT's account has a hard 10-per-day token-issuance quota, discovered 2026-08-02 — a `data-engineer-agent` token-refresh/caching fix in `ingestion/njt_client.py` is what actually manages that constraint (not a workflow-schedule concern); see `ENGINEERING_LOG.md` for the current state of that fix.
 
 ## Why 5 minutes, not 60-120s
 The project plan describes 60-120s polling as ideal for a dedicated worker. GitHub Actions' cron has no finer granularity than a minute, and scheduled runs aren't guaranteed to fire exactly on time besides. 5 minutes is the practical floor for this free-tier approach.

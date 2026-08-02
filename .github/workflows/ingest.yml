@@ -50,3 +50,11 @@ jobs:
           NJT_PASSWORD: ${{ secrets.NJT_PASSWORD }}
         run: python poll_alerts.py
 
+      - name: Poll NJ Transit track assignments
+        working-directory: ingestion
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NJT_USERNAME: ${{ secrets.NJT_USERNAME }}
+          NJT_PASSWORD: ${{ secrets.NJT_PASSWORD }}
+        run: python poll_track_assignments.py
+

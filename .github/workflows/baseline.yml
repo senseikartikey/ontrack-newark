@@ -33,3 +33,9 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python train_model.py
 
+      - name: Compute NY Penn track predictions
+        working-directory: ml
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python compute_track_predictions.py
+
